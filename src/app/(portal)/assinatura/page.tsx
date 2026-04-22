@@ -47,26 +47,13 @@ export default function AssinaturaPage() {
     void load()
   }, [ra, codColigada, codFilial])
 
-  // Workaround: DataServerParamsSchema exige codColigada e codFilial como URL params,
-  // mas totvs.post() só adiciona params na URL para GET. Usar fetch direto até Agent 1
-  // corrigir o client ou relaxar a validação para POST (bug rastreado: para-frente-1.md).
-  async function totvsSend(endpoint: string, data: unknown) {
-    const qs = new URLSearchParams({ codColigada: String(codColigada), codFilial: String(codFilial) })
-    const res = await fetch(`/api/totvs/rest/${endpoint}?${qs.toString()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-    if (!res.ok) throw new Error(`${endpoint} POST falhou: ${res.status}`)
-  }
-
   async function handleConfirmar() {
     if (!aceiteTermos || !aluno || !contrato) return
     setSubmitting(true)
     setErro(null)
 
     try {
-      await totvsSend('EduMatriculaData', {
+      await totvs.post('EduMatriculaData', {
         RA: ra,
         CODCOLIGADA: codColigada,
         CODFILIAL: codFilial,
@@ -74,7 +61,7 @@ export default function AssinaturaPage() {
         TIPOINGRESSO: 'REMATRICULA',
       })
 
-      await totvsSend('EduContratoData', {
+      await totvs.post('EduContratoData', {
         RA: ra,
         CODCOLIGADA: codColigada,
         CODFILIAL: codFilial,
