@@ -1,0 +1,50 @@
+[
+  {
+    "CODCOLIGADA": 2,
+    "CODFILIAL": 3,
+    "NOME": "Colégio Qi Bilíngue — Botafogo",
+    "codColigada": 2,
+    "codFilial": 3,
+    "nomeEscola": "Colégio Qi Bilíngue — Botafogo",
+    "marca": "QiBilingue",
+    "corPrimaria": "#F0C020",
+    "corSecundaria": "#F02030",
+    "logoUrl": "/logos/qi-bilingue.png"
+  },
+  {
+    "CODCOLIGADA": 9,
+    "CODFILIAL": 1,
+    "NOME": "Global Tree — Rio 2",
+    "codColigada": 9,
+    "codFilial": 1,
+    "nomeEscola": "Global Tree — Rio 2",
+    "marca": "GlobalTree",
+    "corPrimaria": "#80C060",
+    "corSecundaria": "#20A0E0",
+    "logoUrl": "/logos/global-tree.png"
+  },
+  {
+    "CODCOLIGADA": 18,
+    "CODFILIAL": 2,
+    "NOME": "Apogeu — Santo Antônio I",
+    "codColigada": 18,
+    "codFilial": 2,
+    "nomeEscola": "Apogeu — Santo Antônio I",
+    "marca": "Apogeu",
+    "corPrimaria": "#305080",
+    "corSecundaria": "#506090",
+    "logoUrl": "/logos/apogeu.png"
+  },
+  {
+    "CODCOLIGADA": 8,
+    "CODFILIAL": 1,
+    "NOME": "Matriz Educação — Rocha Miranda",
+    "codColigada": 8,
+    "codFilial": 1,
+    "nomeEscola": "Matriz Educação — Rocha Miranda",
+    "marca": "Matriz",
+    "corPrimaria": "#2060B0",
+    "corSecundaria": "#20A0A0",
+    "logoUrl": "/logos/matriz.png"
+  }
+]

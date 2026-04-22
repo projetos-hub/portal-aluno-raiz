@@ -1,0 +1,362 @@
+{
+  "qi-bilingue": {
+    "marca": "Colégio Qi Bilíngue",
+    "slug": "qi-bilingue",
+    "corPrimaria": "#F0C020",
+    "corSecundaria": "#F02030",
+    "corTexto": "#000000",
+    "logoFile": "qi-bilingue.png",
+    "coligadas": [
+      {
+        "codColigada": 2,
+        "codFilial": 3,
+        "unidade": "Botafogo"
+      },
+      {
+        "codColigada": 2,
+        "codFilial": 6,
+        "unidade": "Freguesia"
+      },
+      {
+        "codColigada": 6,
+        "codFilial": 1,
+        "unidade": "Metropolitano"
+      },
+      {
+        "codColigada": 10,
+        "codFilial": 1,
+        "unidade": "Recreio"
+      },
+      {
+        "codColigada": 2,
+        "codFilial": 7,
+        "unidade": "Rio 2"
+      },
+      {
+        "codColigada": 2,
+        "codFilial": 2,
+        "unidade": "Tijuca"
+      },
+      {
+        "codColigada": 2,
+        "codFilial": 10,
+        "unidade": "Valqueire"
+      },
+      {
+        "codColigada": 2,
+        "codFilial": 1,
+        "unidade": "Matriz"
+      }
+    ]
+  },
+  "cubo-global-school": {
+    "marca": "Cubo Global School",
+    "slug": "cubo-global-school",
+    "corPrimaria": "#707080",
+    "corSecundaria": "#00B0B0",
+    "corTexto": "#FFFFFF",
+    "logoFile": "cubo-global-school.png",
+    "coligadas": [
+      {
+        "codColigada": 5,
+        "codFilial": 6,
+        "unidade": "Barra Golf"
+      },
+      {
+        "codColigada": 5,
+        "codFilial": 2,
+        "unidade": "Bosque Marapendi"
+      },
+      {
+        "codColigada": 5,
+        "codFilial": 5,
+        "unidade": "Botafogo"
+      },
+      {
+        "codColigada": 5,
+        "codFilial": 1,
+        "unidade": "Matriz"
+      }
+    ]
+  },
+  "global-tree": {
+    "marca": "Global Tree",
+    "slug": "global-tree",
+    "corPrimaria": "#80C060",
+    "corSecundaria": "#20A0E0",
+    "corTexto": "#000000",
+    "logoFile": "global-tree.png",
+    "coligadas": [
+      {
+        "codColigada": 9,
+        "codFilial": 1,
+        "unidade": "Rio 2"
+      },
+      {
+        "codColigada": 9,
+        "codFilial": 2,
+        "unidade": "Recreio"
+      },
+      {
+        "codColigada": 9,
+        "codFilial": 2,
+        "unidade": "Barra Golf"
+      },
+      {
+        "codColigada": 9,
+        "codFilial": 3,
+        "unidade": "Bosque Marapendi"
+      },
+      {
+        "codColigada": 9,
+        "codFilial": 4,
+        "unidade": "Peninsula"
+      },
+      {
+        "codColigada": 17,
+        "codFilial": 1,
+        "unidade": "Botafogo"
+      }
+    ]
+  },
+  "apogeu": {
+    "marca": "Apogeu",
+    "slug": "apogeu",
+    "corPrimaria": "#305080",
+    "corSecundaria": "#506090",
+    "corTexto": "#FFFFFF",
+    "logoFile": "apogeu.png",
+    "coligadas": [
+      {
+        "codColigada": 18,
+        "codFilial": 7,
+        "unidade": "Cidade Alta"
+      },
+      {
+        "codColigada": 18,
+        "codFilial": 5,
+        "unidade": "Global School"
+      },
+      {
+        "codColigada": 18,
+        "codFilial": 2,
+        "unidade": "Santo Antônio I"
+      },
+      {
+        "codColigada": 18,
+        "codFilial": 4,
+        "unidade": "Santo Antônio II"
+      },
+      {
+        "codColigada": 18,
+        "codFilial": 3,
+        "unidade": "Zona Norte"
+      }
+    ]
+  },
+  "unificado": {
+    "marca": "Unificado",
+    "slug": "unificado",
+    "corPrimaria": "#606050",
+    "corSecundaria": "#503080",
+    "corTexto": "#FFFFFF",
+    "logoFile": "unificado.png",
+    "coligadas": [
+      {
+        "codColigada": 11,
+        "codFilial": 1,
+        "unidade": "Ramiro"
+      },
+      {
+        "codColigada": 11,
+        "codFilial": 6,
+        "unidade": "Zona Sul"
+      }
+    ]
+  },
+  "leonardo-da-vinci": {
+    "marca": "Leonardo da Vinci",
+    "slug": "leonardo-da-vinci",
+    "corPrimaria": "#F06010",
+    "corSecundaria": "#606060",
+    "corTexto": "#FFFFFF",
+    "logoFile": "leonardo-da-vinci.png",
+    "coligadas": [
+      {
+        "codColigada": 12,
+        "codFilial": 1,
+        "unidade": "Alfa"
+      },
+      {
+        "codColigada": 12,
+        "codFilial": 2,
+        "unidade": "Beta"
+      },
+      {
+        "codColigada": 16,
+        "codFilial": 1,
+        "unidade": "Gama"
+      }
+    ]
+  },
+  "sa-pereira": {
+    "marca": "Sá Pereira",
+    "slug": "sa-pereira",
+    "corPrimaria": "#1070D0",
+    "corSecundaria": "#E04030",
+    "corTexto": "#FFFFFF",
+    "logoFile": "sa-pereira.png",
+    "coligadas": [
+      {
+        "codColigada": 10,
+        "codFilial": 3,
+        "unidade": "Matriz"
+      },
+      {
+        "codColigada": 10,
+        "codFilial": 6,
+        "unidade": "Pereirinha"
+      }
+    ]
+  },
+  "americano": {
+    "marca": "Colégio Americano Bilíngue",
+    "slug": "americano",
+    "corPrimaria": "#0060C0",
+    "corSecundaria": "#303040",
+    "corTexto": "#FFFFFF",
+    "logoFile": "americano.png",
+    "coligadas": [
+      {
+        "codColigada": 29,
+        "codFilial": 1,
+        "unidade": "Porto Alegre"
+      }
+    ]
+  },
+  "uniao": {
+    "marca": "Colégio União",
+    "slug": "uniao",
+    "corPrimaria": "#D03040",
+    "corSecundaria": "#0060C0",
+    "corTexto": "#FFFFFF",
+    "logoFile": "uniao.png",
+    "coligadas": [
+      {
+        "codColigada": 30,
+        "codFilial": 1,
+        "unidade": "Uruguaiana"
+      }
+    ]
+  },
+  "sarah-dawsey": {
+    "marca": "Sarah Dawsey",
+    "slug": "sarah-dawsey",
+    "corPrimaria": "#104070",
+    "corSecundaria": "#60C0F0",
+    "corTexto": "#FFFFFF",
+    "logoFile": "sarah-dawsey.png",
+    "coligadas": [
+      {
+        "codColigada": 25,
+        "codFilial": 1,
+        "unidade": "Juiz de Fora"
+      },
+      {
+        "codColigada": 31,
+        "codFilial": 1,
+        "unidade": "Tijuca"
+      }
+    ]
+  },
+  "integra": {
+    "marca": "Integra",
+    "slug": "integra",
+    "corPrimaria": "#203050",
+    "corSecundaria": "#40B0E0",
+    "corTexto": "#FFFFFF",
+    "logoFile": "integra.png",
+    "coligadas": [
+      {
+        "codColigada": 20,
+        "codFilial": 2,
+        "unidade": ""
+      }
+    ]
+  },
+  "matriz": {
+    "marca": "Matriz Educação",
+    "slug": "matriz",
+    "corPrimaria": "#2060B0",
+    "corSecundaria": "#20A0A0",
+    "corTexto": "#FFFFFF",
+    "logoFile": "matriz.png",
+    "coligadas": [
+      {
+        "codColigada": 8,
+        "codFilial": 4,
+        "unidade": "Bangu"
+      },
+      {
+        "codColigada": 8,
+        "codFilial": 2,
+        "unidade": "Campo Grande"
+      },
+      {
+        "codColigada": 8,
+        "codFilial": 6,
+        "unidade": "Duque de Caxias"
+      },
+      {
+        "codColigada": 8,
+        "codFilial": 9,
+        "unidade": "Madureira"
+      },
+      {
+        "codColigada": 8,
+        "codFilial": 5,
+        "unidade": "Nova Iguaçu"
+      },
+      {
+        "codColigada": 8,
+        "codFilial": 10,
+        "unidade": "Retiro dos Artistas"
+      },
+      {
+        "codColigada": 8,
+        "codFilial": 1,
+        "unidade": "Rocha Miranda"
+      },
+      {
+        "codColigada": 8,
+        "codFilial": 8,
+        "unidade": "São João de Meriti"
+      },
+      {
+        "codColigada": 8,
+        "codFilial": 3,
+        "unidade": "Taquara"
+      },
+      {
+        "codColigada": 8,
+        "codFilial": 11,
+        "unidade": "Tijuca"
+      }
+    ]
+  },
+  "sap": {
+    "marca": "SAP",
+    "slug": "sap",
+    "corPrimaria": "#F06040",
+    "corSecundaria": "#105090",
+    "corTexto": "#000000",
+    "logoFile": "sap.png",
+    "coligadas": [
+      {
+        "codColigada": 10,
+        "codFilial": 7,
+        "unidade": "Barra"
+      }
+    ]
+  }
+}
