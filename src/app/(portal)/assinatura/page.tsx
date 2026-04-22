@@ -153,10 +153,16 @@ export default function AssinaturaPage() {
         </div>
       </div>
 
-      {/* Aviso irreversível */}
-      <div className="rounded-md border border-destructive/50 bg-destructive/5 px-4 py-3">
-        <p className="text-sm text-destructive font-medium">
-          ⚠ Esta ação é irreversível. Após confirmar, a matrícula será registrada.
+      {/* Tarefa 2.C: assinatura como momento positivo — sem vermelho agressivo */}
+      <div
+        className="rounded-xl px-4 py-3"
+        style={{
+          background: 'var(--cor-primaria-10, rgba(30,64,175,0.08))',
+          border: '1px solid var(--cor-primaria-20, rgba(30,64,175,0.15))',
+        }}
+      >
+        <p className="text-sm font-medium" style={{ color: 'var(--cor-primaria, #1e40af)' }}>
+          🎓 Ao confirmar, a vaga do seu filho no próximo ano letivo estará garantida.
         </p>
       </div>
 

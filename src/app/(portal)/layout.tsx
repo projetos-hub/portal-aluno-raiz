@@ -6,7 +6,24 @@ import Image from 'next/image'
 import { getSession, clearSession } from '@/lib/auth'
 import { BrandThemeContext, getBrandTheme } from '@/lib/brand-theme'
 import type { BrandTheme } from '@/lib/brand-theme'
-import { Button } from '@/components/ui/button'
+
+function PortalHeaderSkeleton() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <div className="h-16 sm:h-[68px] flex items-center justify-between px-5 sm:px-8" style={{ background: 'var(--cor-primaria, #1e40af)' }}>
+        <div className="flex items-center gap-4">
+          <div className="h-8 w-24 rounded-md bg-white/15 animate-pulse" />
+          <div className="hidden sm:flex flex-col gap-1">
+            <div className="h-2.5 w-28 rounded bg-white/15 animate-pulse" />
+            <div className="h-2 w-20 rounded bg-white/10 animate-pulse" />
+          </div>
+        </div>
+        <div className="h-8 w-12 rounded-lg bg-white/15 animate-pulse" />
+      </div>
+      <main className="flex-1 p-4 sm:p-6 sm:p-8" />
+    </div>
+  )
+}
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -26,7 +43,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       try {
         setTheme(getBrandTheme(codColigada, codFilial))
       } catch {
-        // Marca não mapeada ainda — layout sem tema dinâmico
+        // Escola não mapeada — layout sem tema dinâmico
       }
     }
     setMounted(true)
@@ -38,7 +55,11 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     router.push('/login')
   }
 
-  if (!mounted) return null
+  if (!mounted) return <PortalHeaderSkeleton />
+
+  const corPrimaria = theme?.corPrimaria ?? '#1e40af'
+  const corSecundaria = theme?.corSecundaria ?? '#1e3a8a'
+  const corTexto = theme?.corTexto ?? '#ffffff'
 
   const content = (
     <div
@@ -46,27 +67,29 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       style={
         theme
           ? ({
-              '--cor-primaria': theme.corPrimaria,
-              '--cor-secundaria': theme.corSecundaria,
-              '--cor-texto': theme.corTexto,
+              '--cor-primaria': corPrimaria,
+              '--cor-secundaria': corSecundaria,
+              '--cor-texto': corTexto,
             } as React.CSSProperties)
           : undefined
       }
     >
+      {/* Tarefa 2.B: header com branding dramático */}
       <header
-        className="flex items-center justify-between px-4 py-3 shadow-sm"
+        className="flex items-center justify-between px-5 sm:px-8 transition-colors duration-500"
         style={{
-          backgroundColor: theme?.corPrimaria ?? '#1e40af',
-          color: theme?.corTexto ?? '#FFFFFF',
+          background: `linear-gradient(135deg, ${corPrimaria} 0%, ${corSecundaria} 100%)`,
+          color: corTexto,
+          minHeight: theme ? '68px' : '60px',
         }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {theme ? (
             <Image
               src={`/logos/${theme.logoFile}`}
               alt={theme.marca}
-              width={80}
-              height={28}
+              width={88}
+              height={32}
               priority
               className="object-contain brightness-0 invert"
             />
@@ -74,26 +97,41 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             <Image
               src="/logo-raiz.svg"
               alt="Raiz Educação"
-              width={80}
-              height={28}
+              width={88}
+              height={32}
               priority
               className="object-contain brightness-0 invert"
             />
           )}
-          <span className="text-sm font-medium hidden sm:block">
-            {theme?.nomeEscola ?? 'Portal do Aluno'}
-          </span>
+          {/* Tarefa 2.B: banner boas-vindas da escola */}
+          {theme && (
+            <div className="hidden sm:flex flex-col leading-tight">
+              <span className="text-xs font-medium opacity-70 tracking-wide">
+                Bem-vindo ao
+              </span>
+              <span className="text-sm font-semibold">{theme.nomeEscola}</span>
+            </div>
+          )}
+          {!theme && (
+            <span className="hidden sm:block text-sm font-medium opacity-90">
+              Portal do Aluno
+            </span>
+          )}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
+
+        <button
           onClick={handleLogout}
-          className="text-white hover:bg-white/20"
+          className="text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white/15 active:bg-white/25"
+          style={{ color: corTexto }}
         >
           Sair
-        </Button>
+        </button>
       </header>
-      <main className="flex-1 p-4 sm:p-6">{children}</main>
+
+      {/* Tarefa 2.E: fadeUp nas transições de página */}
+      <main key={pathname} className="flex-1 p-4 sm:p-6 lg:p-8 animate-fade-up">
+        {children}
+      </main>
     </div>
   )
 

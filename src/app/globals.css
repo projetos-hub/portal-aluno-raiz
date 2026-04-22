@@ -48,7 +48,15 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Portal do Aluno — Sistema de cores dinâmico por escola */
 :root {
+  /* Defaults antes de qualquer escola ser carregada */
+  --cor-primaria: #1e40af;
+  --cor-secundaria: #1e3a8a;
+  --cor-texto: #ffffff;
+  --cor-primaria-10: color-mix(in srgb, var(--cor-primaria) 10%, transparent);
+  --cor-primaria-20: color-mix(in srgb, var(--cor-primaria) 20%, transparent);
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -115,6 +123,15 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Animações de página */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 0.25s ease-out both;
 }
 
 @layer base {
