@@ -87,8 +87,8 @@ export default function RematriculaPage() {
           <Badge
             className={
               matricula.TIPOINGRESSO === 'REMATRICULA'
-                ? 'bg-blue-600 hover:bg-blue-600'
-                : 'bg-green-600 text-white hover:bg-green-600'
+                ? 'bg-[var(--cor-primaria)] hover:opacity-90'
+                : 'bg-green-600 text-white hover:opacity-90'
             }
           >
             {matricula.TIPOINGRESSO}
