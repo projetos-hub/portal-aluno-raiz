@@ -48,8 +48,6 @@ export default function LoginPage() {
         return
       }
 
-      // Use server-provided user if available; otherwise stub until Agent 3
-      // updates mockAuthHandler to return user info (pending Sprint 1.5+)
       const user: AuthUser = data.user ?? {
         id: email,
         email,
@@ -58,18 +56,10 @@ export default function LoginPage() {
         alunosRA: [],
       }
 
-      // Sempre seta cookies client-readable para que getSession() funcione no layout.
-      // /api/auth/session usa httpOnly=true (não legível por JS) — necessário duplicar aqui.
+      // Seta cookies client-readable (lidos por getSession() no layout).
+      // Não usar /api/auth/session aqui: httpOnly sobrescreve o cookie não-httpOnly
+      // impedindo getSession() de funcionar (bug de coexistência de cookies em Chrome).
       setSession(data.token, data.expiresIn, user)
-
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-        // Também seta httpOnly via API route para segurança adicional em produção.
-        await fetch('/api/auth/session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: data.token, expiresIn: data.expiresIn, user }),
-        })
-      }
       router.push('/selecao')
     } catch {
       setError('Erro de conexão. Tente novamente.')
@@ -79,7 +69,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    // Sprint 7.B: gradiente de fundo e layout visual mais rico
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#1e40af] via-[#1e3a8a] to-[#172554]">
       {logoutMsg && (
         <div
           role="status"
@@ -89,57 +80,76 @@ export default function LoginPage() {
           Você saiu com sucesso.
         </div>
       )}
-      <Card className="w-full max-w-sm shadow-sm">
-        <CardHeader className="items-center pb-2 pt-8">
+
+      <div className="w-full max-w-sm space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* Sprint 7.B: logo maior centralizada acima do card */}
+        <div className="flex flex-col items-center gap-2">
           <Image
             src="/logo-raiz.svg"
             alt="Raiz Educação"
-            width={140}
-            height={48}
+            width={180}
+            height={60}
             priority
+            className="brightness-0 invert"
           />
-          <p className="text-muted-foreground text-sm mt-3">
-            Portal do Aluno — Rematrícula 2026
-          </p>
-        </CardHeader>
-        <CardContent className="pb-8">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="responsavel@email.com"
-                required
-                autoComplete="email"
-                autoFocus
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••"
-                required
-                autoComplete="current-password"
-              />
-            </div>
-            {error && (
-              <p className="text-sm text-destructive rounded-md bg-destructive/10 px-3 py-2">
-                {error}
-              </p>
-            )}
-            <Button type="submit" className="w-full mt-2" disabled={loading}>
-              {loading ? 'Entrando…' : 'Entrar'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          <p className="text-white/80 text-sm">Portal do Aluno — Rematrícula 2026</p>
+        </div>
+
+        <Card className="shadow-2xl border-0">
+          <CardHeader className="pb-2 pt-6">
+            <h1 className="text-xl font-semibold text-center">Entrar</h1>
+          </CardHeader>
+          <CardContent className="pb-8">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="email">E-mail</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="responsavel@email.com"
+                  required
+                  autoComplete="email"
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••"
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
+              {error && (
+                <p className="text-sm text-destructive rounded-md bg-destructive/10 px-3 py-2">
+                  {error}
+                </p>
+              )}
+              {/* Sprint 7.B: loading no botão com spinner */}
+              <Button
+                type="submit"
+                className="w-full mt-2 bg-[#1e40af] hover:bg-[#1e3a8a]"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Entrando…
+                  </span>
+                ) : (
+                  'Entrar'
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

@@ -1,16 +1,35 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSession, setSession } from '@/lib/auth'
 import { totvs } from '@/lib/totvs/client'
 import type { EduAluno, EduMatricula } from '@/lib/totvs/types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 interface AlunoCard {
   aluno: EduAluno
   matricula: EduMatricula | null
+}
+
+function SelecaoSkeleton() {
+  return (
+    <div className="max-w-lg mx-auto space-y-3">
+      <div className="h-6 w-36 rounded-md bg-muted animate-pulse mb-4" />
+      {[1, 2, 3].map(i => (
+        <div key={i} className="rounded-lg border p-4 flex justify-between items-start gap-4">
+          <div className="space-y-2 flex-1 min-w-0">
+            <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
+            <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
+            <div className="h-3 w-1/3 rounded bg-muted animate-pulse" />
+          </div>
+          <div className="h-5 w-20 rounded-full bg-muted animate-pulse shrink-0" />
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export default function SelecaoPage() {
@@ -18,6 +37,13 @@ export default function SelecaoPage() {
   const [cards, setCards] = useState<AlunoCard[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
+
+  const retry = useCallback(() => {
+    setError(null)
+    setLoading(true)
+    setRetryCount(c => c + 1)
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -25,25 +51,24 @@ export default function SelecaoPage() {
       if (!session) return
 
       try {
-        // Fetch alunos — mock returns all; real TOTVS would filter by token scope
-        const alunosRes = await totvs.get<EduAluno>('EduAlunoData')
-        const alunos = alunosRes.data ?? []
+        const { codColigada, codFilial } = session.user
+        const params = codColigada > 0 ? { codColigada, codFilial } : undefined
 
-        // Fetch matrículas para todos os alunos retornados
-        const matriculasRes = await totvs.get<EduMatricula>('EduMatriculaData')
+        const [alunosRes, matriculasRes] = await Promise.all([
+          totvs.get<EduAluno>('EduAlunoData', params),
+          totvs.get<EduMatricula>('EduMatriculaData', params),
+        ])
+
+        const alunos = alunosRes.data ?? []
         const matriculas = matriculasRes.data ?? []
 
         const result: AlunoCard[] = alunos.map(a => ({
           aluno: a,
-          matricula: matriculas.find(
-            m => m.RA === a.RA && m.CODCOLIGADA === a.CODCOLIGADA,
-          ) ?? null,
+          matricula: matriculas.find(m => m.RA === a.RA && m.CODCOLIGADA === a.CODCOLIGADA) ?? null,
         }))
 
         setCards(result)
 
-        // Atualiza a sessão com a escola do primeiro aluno (workaround até
-        // mockAuthHandler retornar user info — será removido em sprint futuro)
         if (alunos.length > 0 && session.user.codColigada === 0) {
           const first = alunos[0]
           setSession(session.token, 300, {
@@ -61,11 +86,10 @@ export default function SelecaoPage() {
     }
 
     void load()
-  }, [])
+  }, [retryCount])
 
   function handleSelect(card: AlunoCard) {
     const { aluno } = card
-    // Atualiza sessão com a escola do aluno selecionado
     const session = getSession()
     if (session) {
       setSession(session.token, 300, {
@@ -74,29 +98,31 @@ export default function SelecaoPage() {
         codFilial: aluno.CODFILIAL,
       })
     }
-    router.push(
-      `/rematricula?ra=${aluno.RA}&codColigada=${aluno.CODCOLIGADA}&codFilial=${aluno.CODFILIAL}`,
-    )
+    router.push(`/rematricula?ra=${aluno.RA}&codColigada=${aluno.CODCOLIGADA}&codFilial=${aluno.CODFILIAL}`)
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-48">
-        <p className="text-muted-foreground text-sm">Carregando alunos…</p>
-      </div>
-    )
-  }
+  if (loading) return <SelecaoSkeleton />
 
   if (error) {
     return (
-      <div className="text-destructive text-sm p-4 rounded-md bg-destructive/10">{error}</div>
+      <div className="max-w-lg mx-auto">
+        <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4 space-y-3">
+          <p className="text-destructive text-sm">{error}</p>
+          <Button variant="outline" size="sm" onClick={retry}>
+            Tentar novamente
+          </Button>
+        </div>
+      </div>
     )
   }
 
   if (cards.length === 0) {
     return (
-      <div className="text-center text-muted-foreground py-12">
-        Nenhum aluno encontrado para esta conta.
+      <div className="max-w-lg mx-auto text-center py-12 space-y-3">
+        <p className="text-muted-foreground">Nenhum aluno encontrado para esta conta.</p>
+        <Button variant="outline" size="sm" onClick={retry}>
+          Tentar novamente
+        </Button>
       </div>
     )
   }
@@ -131,9 +157,7 @@ export default function SelecaoPage() {
             </div>
             <div className="flex flex-col items-end gap-2 shrink-0">
               <Badge
-                variant={
-                  matricula?.TIPOINGRESSO === 'REMATRICULA' ? 'default' : 'secondary'
-                }
+                variant={matricula?.TIPOINGRESSO === 'REMATRICULA' ? 'default' : 'secondary'}
                 className={
                   matricula?.TIPOINGRESSO === 'REMATRICULA'
                     ? 'bg-blue-600 hover:bg-blue-600'

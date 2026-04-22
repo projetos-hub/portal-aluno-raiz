@@ -8,6 +8,22 @@ import { BrandThemeContext, getBrandTheme } from '@/lib/brand-theme'
 import type { BrandTheme } from '@/lib/brand-theme'
 import { Button } from '@/components/ui/button'
 
+// Sprint 7.A: skeleton do header para eliminar flash de tela branca
+function PortalHeaderSkeleton() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <header className="flex items-center justify-between px-4 py-3 shadow-sm bg-[#1e40af]">
+        <div className="flex items-center gap-3">
+          <div className="h-7 w-20 rounded bg-white/20 animate-pulse" />
+          <div className="h-4 w-28 rounded bg-white/20 animate-pulse hidden sm:block" />
+        </div>
+        <div className="h-8 w-12 rounded bg-white/20 animate-pulse" />
+      </header>
+      <main className="flex-1 p-4 sm:p-6" />
+    </div>
+  )
+}
+
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -26,7 +42,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       try {
         setTheme(getBrandTheme(codColigada, codFilial))
       } catch {
-        // Marca não mapeada ainda — layout sem tema dinâmico
+        // Marca não mapeada — layout sem tema dinâmico
       }
     }
     setMounted(true)
@@ -38,7 +54,11 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     router.push('/login')
   }
 
-  if (!mounted) return null
+  // Sprint 7.A: skeleton em vez de tela branca enquanto monta
+  if (!mounted) return <PortalHeaderSkeleton />
+
+  const headerBg = theme?.corPrimaria ?? '#1e40af'
+  const headerColor = theme?.corTexto ?? '#FFFFFF'
 
   const content = (
     <div
@@ -54,11 +74,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       }
     >
       <header
-        className="flex items-center justify-between px-4 py-3 shadow-sm"
-        style={{
-          backgroundColor: theme?.corPrimaria ?? '#1e40af',
-          color: theme?.corTexto ?? '#FFFFFF',
-        }}
+        className="flex items-center justify-between px-4 py-3 shadow-sm transition-colors duration-300"
+        style={{ backgroundColor: headerBg, color: headerColor }}
       >
         <div className="flex items-center gap-3">
           {theme ? (
@@ -80,9 +97,20 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               className="object-contain brightness-0 invert"
             />
           )}
-          <span className="text-sm font-medium hidden sm:block">
-            {theme?.nomeEscola ?? 'Portal do Aluno'}
-          </span>
+          {/* Sprint 7.C: banner boas-vindas da escola */}
+          {theme && (
+            <div className="flex flex-col">
+              <span className="text-xs opacity-75 leading-none hidden sm:block">
+                Bem-vindo ao
+              </span>
+              <span className="text-sm font-semibold hidden sm:block leading-tight">
+                {theme.nomeEscola}
+              </span>
+            </div>
+          )}
+          {!theme && (
+            <span className="text-sm font-medium hidden sm:block">Portal do Aluno</span>
+          )}
         </div>
         <Button
           variant="ghost"
@@ -93,7 +121,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           Sair
         </Button>
       </header>
-      <main className="flex-1 p-4 sm:p-6">{children}</main>
+      {/* Sprint 7.F: fadeIn na troca de página */}
+      <main className="flex-1 p-4 sm:p-6 animate-in fade-in duration-200">{children}</main>
     </div>
   )
 

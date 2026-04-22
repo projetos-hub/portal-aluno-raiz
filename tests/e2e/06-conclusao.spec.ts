@@ -7,7 +7,8 @@ test.beforeEach(async ({ page }) => {
 
 test('status=sucesso exibe Matrícula Confirmada!', async ({ page }) => {
   await page.goto('/conclusao?status=sucesso')
-  await expect(page.getByText('✅')).toBeVisible()
+  // Sprint 7.E: emoji alterado para 🎉 (celebração)
+  await expect(page.getByText('🎉')).toBeVisible()
   await expect(page.getByText(/matrícula confirmada/i)).toBeVisible()
 })
 

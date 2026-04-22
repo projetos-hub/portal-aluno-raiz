@@ -9,7 +9,8 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('exibe nome do aluno', async ({ page }) => {
-  await expect(page.getByText('Lucas Torres Silva')).toBeVisible()
+  // O nome aparece no bloco Dados do Aluno e no bloco Responsável — usar .first()
+  await expect(page.getByText('Lucas Torres Silva').first()).toBeVisible()
 })
 
 test('exibe valor financeiro em BRL', async ({ page }) => {

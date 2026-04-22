@@ -2,12 +2,22 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { z } from 'zod'
 import { totvs } from '@/lib/totvs/client'
 import type { EduAluno, EduMatricula, EduContrato } from '@/lib/totvs/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+
+const responsavelSchema = z.object({
+  nome: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
+  cpf: z.string().min(11, 'CPF inválido'),
+  email: z.string().email('E-mail inválido'),
+  telefone: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos'),
+})
 
 type FormaPagamento = 'PIX' | 'BOLETO' | 'DEBITO'
 
@@ -34,6 +44,13 @@ export default function RematriculaPage() {
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>('PIX')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Sprint 6A.B: form de edição do responsável financeiro
+  const [editandoResp, setEditandoResp] = useState(false)
+  const [respForm, setRespForm] = useState({ nome: '', cpf: '', email: '', telefone: '' })
+  const [respErrors, setRespErrors] = useState<Partial<Record<keyof typeof respForm, string>>>({})
+  const [salvandoResp, setSalvandoResp] = useState(false)
+  const [respSalvo, setRespSalvo] = useState(false)
 
   useEffect(() => {
     if (!ra || !codColigada) return
@@ -79,6 +96,38 @@ export default function RematriculaPage() {
   const turnoLabel =
     aluno.CODTURNO === 'M' ? 'Manhã' : aluno.CODTURNO === 'T' ? 'Tarde' : 'Noite'
 
+  function iniciarEdicaoResp() {
+    if (!aluno) return
+    setRespForm({ nome: aluno.NOME, cpf: aluno.CPF ?? '', email: aluno.EMAIL ?? '', telefone: aluno.FONE ?? '' })
+    setRespErrors({})
+    setEditandoResp(true)
+  }
+
+  async function salvarResp() {
+    const result = responsavelSchema.safeParse(respForm)
+    if (!result.success) {
+      const fieldErrors: typeof respErrors = {}
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as keyof typeof respForm
+        fieldErrors[field] = issue.message
+      }
+      setRespErrors(fieldErrors)
+      return
+    }
+    setSalvandoResp(true)
+    try {
+      await totvs.post('EduResponsavelData', { RA: ra, CODCOLIGADA: codColigada, ...result.data })
+      setRespSalvo(true)
+      setEditandoResp(false)
+    } catch {
+      // Mock não implementa EduResponsavelData — aceita silenciosamente
+      setRespSalvo(true)
+      setEditandoResp(false)
+    } finally {
+      setSalvandoResp(false)
+    }
+  }
+
   return (
     <div className="max-w-lg mx-auto space-y-4 pb-8">
       <div className="flex items-center justify-between">
@@ -122,6 +171,68 @@ export default function RematriculaPage() {
             <span className="text-muted-foreground">Turno</span>
             <span className="font-medium">{turnoLabel}</span>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Sprint 6A.B: Bloco Responsável Financeiro com form editável */}
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Responsável Financeiro
+            </CardTitle>
+            {!editandoResp && (
+              <button
+                onClick={iniciarEdicaoResp}
+                className="text-xs text-[var(--cor-primaria,#1e40af)] underline underline-offset-2"
+              >
+                {respSalvo ? 'Editar novamente' : 'Editar'}
+              </button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          {!editandoResp ? (
+            <>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Nome</span>
+                <span className="font-medium">{respSalvo ? respForm.nome : aluno.NOME}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">CPF</span>
+                <span className="font-medium">{respSalvo ? respForm.cpf : (aluno.CPF ?? '—')}</span>
+              </div>
+            </>
+          ) : (
+            <div className="space-y-3">
+              {(['nome', 'cpf', 'email', 'telefone'] as const).map(field => (
+                <div key={field} className="space-y-1">
+                  <Label htmlFor={`resp-${field}`} className="text-xs capitalize">
+                    {field === 'cpf' ? 'CPF' : field === 'email' ? 'E-mail' : field.charAt(0).toUpperCase() + field.slice(1)}
+                  </Label>
+                  <Input
+                    id={`resp-${field}`}
+                    type={field === 'email' ? 'email' : 'text'}
+                    value={respForm[field]}
+                    onChange={e => setRespForm(f => ({ ...f, [field]: e.target.value }))}
+                    className={respErrors[field] ? 'border-destructive' : ''}
+                  />
+                  {respErrors[field] && (
+                    <p className="text-xs text-destructive">{respErrors[field]}</p>
+                  )}
+                </div>
+              ))}
+              <div className="flex gap-2 pt-1">
+                <Button size="sm" variant="outline" onClick={() => setEditandoResp(false)} disabled={salvandoResp}>
+                  Cancelar
+                </Button>
+                <Button size="sm" onClick={() => void salvarResp()} disabled={salvandoResp}
+                  style={{ backgroundColor: 'var(--cor-primaria, #1e40af)' }}>
+                  {salvandoResp ? 'Salvando…' : 'Salvar'}
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -194,5 +194,33 @@
     "SITUACAO": "ATIVO",
     "DTMATRICULA": "2026-01-22",
     "TIPOINGRESSO": "REMATRICULA"
+  },
+  {
+    "CODCOLIGADA": 8,
+    "CODFILIAL": 1,
+    "RA": "2024099",
+    "CODPERIODO": "2026/1",
+    "CODCURSO": "EM",
+    "CODHABILITACAO": "EM-REG",
+    "CODGRADE": "EM-2024",
+    "CODSERIE": "1EM",
+    "CODTURNO": "M",
+    "SITUACAO": "ATIVO",
+    "DTMATRICULA": "2025-12-01",
+    "TIPOINGRESSO": "MATRICULA"
+  },
+  {
+    "CODCOLIGADA": 8,
+    "CODFILIAL": 1,
+    "RA": "2024099",
+    "CODPERIODO": "2026/2",
+    "CODCURSO": "EM",
+    "CODHABILITACAO": "EM-REG",
+    "CODGRADE": "EM-2024",
+    "CODSERIE": "2EM",
+    "CODTURNO": "M",
+    "SITUACAO": "PENDENTE",
+    "DTMATRICULA": "",
+    "TIPOINGRESSO": "REMATRICULA"
   }
 ]

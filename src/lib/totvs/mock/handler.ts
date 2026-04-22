@@ -112,6 +112,11 @@ export async function mockHandler(
   method: string,
   body?: unknown,
 ): Promise<TotvsResponse<unknown>> {
+  // Edge case: simulated 504 (enable via env TOTVS_MOCK_SIMULATE_504=true)
+  if (process.env.TOTVS_MOCK_SIMULATE_504 === 'true' && Math.random() < 0.1) {
+    throw new Error('Simulated 504 Gateway Timeout')
+  }
+
   const ds = dataserver.toLowerCase().replace(/^\//, '')
   const m = method.toUpperCase()
 

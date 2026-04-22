@@ -160,5 +160,23 @@
     "CODSERIE": "8EF",
     "CODTURNO": "M",
     "SITUACAO": "ATIVO"
+  },
+  {
+    "CODCOLIGADA": 8,
+    "CODFILIAL": 1,
+    "RA": "2024099",
+    "NOME": "Pedro Lucas Mesquita",
+    "CPF": "000.000.000-99",
+    "DTNASCIMENTO": "2011-05-12",
+    "SEXO": "M",
+    "EMAIL": "pedro.mesquita@email.com",
+    "FONE": "(21) 99700-0099",
+    "CODCURSO": "EM",
+    "CODHABILITACAO": "EM-REG",
+    "CODGRADE": "EM-2024",
+    "CODPERIODO": "2026/1",
+    "CODSERIE": "1EM",
+    "CODTURNO": "M",
+    "SITUACAO": "ATIVO"
   }
 ]

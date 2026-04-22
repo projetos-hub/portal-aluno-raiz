@@ -155,10 +155,10 @@ export default function AssinaturaPage() {
         </div>
       </div>
 
-      {/* Aviso irreversível */}
-      <div className="rounded-md border border-destructive/50 bg-destructive/5 px-4 py-3">
-        <p className="text-sm text-destructive font-medium">
-          ⚠ Esta ação é irreversível. Após confirmar, a matrícula será registrada.
+      {/* Sprint 7.D: linguagem de celebração em vez de aviso agressivo em vermelho */}
+      <div className="rounded-md border border-[var(--cor-primaria,#1e40af)]/30 bg-[var(--cor-primaria,#1e40af)]/5 px-4 py-3">
+        <p className="text-sm font-medium" style={{ color: 'var(--cor-primaria, #1e40af)' }}>
+          🎓 Ao confirmar, sua vaga para {new Date().getFullYear() + 1} estará garantida.
         </p>
       </div>
 
