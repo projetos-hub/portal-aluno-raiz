@@ -25,12 +25,15 @@ export default function SelecaoPage() {
       if (!session) return
 
       try {
-        // Fetch alunos — mock returns all; real TOTVS would filter by token scope
-        const alunosRes = await totvs.get<EduAluno>('EduAlunoData')
+        const { codColigada, codFilial } = session.user
+        const params = codColigada > 0 ? { codColigada, codFilial } : undefined
+
+        // Fetch alunos — filter by session school when available
+        const alunosRes = await totvs.get<EduAluno>('EduAlunoData', params)
         const alunos = alunosRes.data ?? []
 
-        // Fetch matrículas para todos os alunos retornados
-        const matriculasRes = await totvs.get<EduMatricula>('EduMatriculaData')
+        // Fetch matrículas para os alunos retornados
+        const matriculasRes = await totvs.get<EduMatricula>('EduMatriculaData', params)
         const matriculas = matriculasRes.data ?? []
 
         const result: AlunoCard[] = alunos.map(a => ({

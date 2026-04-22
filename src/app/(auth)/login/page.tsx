@@ -58,18 +58,10 @@ export default function LoginPage() {
         alunosRA: [],
       }
 
-      // Sempre seta cookies client-readable para que getSession() funcione no layout.
-      // /api/auth/session usa httpOnly=true (não legível por JS) — necessário duplicar aqui.
+      // Seta cookies client-readable necessários para getSession() funcionar no layout.
+      // A integração httpOnly via /api/auth/session fica para Sprint futuro quando
+      // houver session server-side completa (coexistência de cookies gera conflito).
       setSession(data.token, data.expiresIn, user)
-
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-        // Também seta httpOnly via API route para segurança adicional em produção.
-        await fetch('/api/auth/session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: data.token, expiresIn: data.expiresIn, user }),
-        })
-      }
       router.push('/selecao')
     } catch {
       setError('Erro de conexão. Tente novamente.')

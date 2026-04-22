@@ -53,7 +53,6 @@ export default function AssinaturaPage() {
     setErro(null)
 
     try {
-      // POST matrícula
       await totvs.post('EduMatriculaData', {
         RA: ra,
         CODCOLIGADA: codColigada,
@@ -62,7 +61,6 @@ export default function AssinaturaPage() {
         TIPOINGRESSO: 'REMATRICULA',
       })
 
-      // POST contrato
       await totvs.post('EduContratoData', {
         RA: ra,
         CODCOLIGADA: codColigada,
