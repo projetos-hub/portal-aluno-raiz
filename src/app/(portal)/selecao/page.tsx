@@ -175,14 +175,15 @@ export default function SelecaoPage() {
   return (
     <div className="max-w-lg mx-auto space-y-3">
       <h1 className="text-lg font-semibold mb-4">Selecione o aluno</h1>
-      {cards.map(({ aluno, matricula }) => {
+      {cards.map(({ aluno, matricula }, index) => {
         const key = `${aluno.CODCOLIGADA}-${aluno.RA}`
         const hist = historico[key]
 
         return (
           <Card
             key={key}
-            className="overflow-hidden"
+            className="overflow-hidden animate-stagger"
+            style={{ animationDelay: `${index * 100}ms` }}
           >
             <CardContent
               className="p-4 flex justify-between items-start gap-4 cursor-pointer hover:bg-accent/30 transition-colors active:scale-[.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-t-lg"
