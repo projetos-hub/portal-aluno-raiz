@@ -4,7 +4,7 @@ test('fluxo completo: login → selecao → rematricula → assinatura → concl
   // 1. Login
   await page.goto('/login')
   await page.getByLabel(/e-?mail/i).fill('maria.silva@email.com')
-  await page.getByLabel(/senha/i).fill('123456')
+  await page.locator('#password').fill('123456')
   await page.getByRole('button', { name: /entrar/i }).click()
 
   // 2. Selecao — aguarda cards de aluno carregarem
