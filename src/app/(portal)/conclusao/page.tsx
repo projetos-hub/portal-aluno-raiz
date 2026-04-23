@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { getSession } from '@/lib/auth'
 
 const CONFETTI_COLORS = ['#F0C020', '#2060B0', '#60C080', '#E05080', '#8060C0', '#20A0E0']
 const CONFETTI_PIECES = Array.from({ length: 18 }, (_, i) => ({
@@ -22,6 +23,9 @@ export default function ConclusaoPage() {
   const sucesso = status === 'sucesso'
 
   const [copiado, setCopiado] = useState(false)
+
+  // Notificação de email pós-assinatura — UX apenas (sem envio real)
+  const emailResponsavel = getSession()?.user?.email ?? null
 
   function copiarProtocolo() {
     void navigator.clipboard.writeText(protocolo).then(() => {
@@ -64,6 +68,23 @@ export default function ConclusaoPage() {
             : 'Sua solicitação foi recebida e está sendo analisada. Você será notificado por e-mail assim que for processada.'}
         </p>
       </div>
+
+      {sucesso && emailResponsavel && (
+        <div
+          className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-left animate-fade-up"
+          style={{
+            animationDelay: '0.3s',
+            background: 'rgba(22,163,74,0.07)',
+            border: '1px solid rgba(22,163,74,0.2)',
+          }}
+        >
+          <span className="text-lg shrink-0">📧</span>
+          <p className="text-green-800 dark:text-green-300">
+            Email de confirmação enviado para{' '}
+            <span className="font-medium">{emailResponsavel}</span>
+          </p>
+        </div>
+      )}
 
       {sucesso && (
         <>
