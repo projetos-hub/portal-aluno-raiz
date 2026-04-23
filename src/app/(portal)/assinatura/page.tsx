@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { totvs } from '@/lib/totvs/client'
 import type { EduAluno, EduContrato } from '@/lib/totvs/types'
+import { BrandThemeContext } from '@/lib/brand-theme'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -14,6 +15,12 @@ function moeda(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
+const FORMA_LABELS: Record<string, string> = {
+  PIX: 'Pix',
+  BOLETO: 'Boleto bancário',
+  DEBITO: 'Débito automático',
+}
+
 export default function AssinaturaPage() {
   const router = useRouter()
   const params = useSearchParams()
@@ -22,6 +29,8 @@ export default function AssinaturaPage() {
   const codFilial = Number(params.get('codFilial') ?? 0)
   const formaPagamento = params.get('formaPagamento') ?? 'PIX'
 
+  const theme = useContext(BrandThemeContext)
+
   const [aluno, setAluno] = useState<EduAluno | null>(null)
   const [contrato, setContrato] = useState<EduContrato | null>(null)
   const [aceiteTermos, setAceiteTermos] = useState(false)
@@ -29,6 +38,9 @@ export default function AssinaturaPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
+
+  const confirmBtnRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!ra || !codColigada) return
@@ -47,14 +59,28 @@ export default function AssinaturaPage() {
     void load()
   }, [ra, codColigada, codFilial])
 
+  // Foca o botão "Confirmar" do modal ao abrir
+  useEffect(() => {
+    if (modalOpen) confirmBtnRef.current?.focus()
+  }, [modalOpen])
+
+  // Fechar modal com Escape
+  useEffect(() => {
+    if (!modalOpen) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setModalOpen(false)
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [modalOpen])
+
   async function handleConfirmar() {
     if (!aceiteTermos || !aluno || !contrato) return
+    setModalOpen(false)
     setSubmitting(true)
     setErro(null)
 
     try {
-      // Captura IDMATRICULA para exibir como protocolo na conclusão
-      // totvs.post() agora envia params na URL (PR #8 do Agente 1 — fix definitivo)
       const urlParams = { codColigada, codFilial }
       const matRes = await totvs.post<{ IDMATRICULA?: string }>(
         'EduMatriculaData',
@@ -69,9 +95,9 @@ export default function AssinaturaPage() {
         urlParams,
       )
 
-      const params = new URLSearchParams({ status: 'sucesso' })
-      if (idMatricula) params.set('idMatricula', idMatricula)
-      router.push(`/conclusao?${params.toString()}`)
+      const qs = new URLSearchParams({ status: 'sucesso' })
+      if (idMatricula) qs.set('idMatricula', idMatricula)
+      router.push(`/conclusao?${qs.toString()}`)
     } catch {
       setErro('Erro ao confirmar matrícula. Tente novamente.')
     } finally {
@@ -100,6 +126,77 @@ export default function AssinaturaPage() {
           <p className="text-sm font-medium text-muted-foreground">Confirmando matrícula…</p>
         </div>
       )}
+
+      {/* Modal de confirmação — aparece antes do POST */}
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          onClick={e => { if (e.target === e.currentTarget) setModalOpen(false) }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+            className="bg-background rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4 animate-fade-up"
+          >
+            <div>
+              <h2 id="modal-title" className="text-lg font-semibold">
+                Confirmar rematrícula?
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Revise os dados antes de finalizar.
+              </p>
+            </div>
+
+            <div className="rounded-xl border bg-muted/30 p-4 space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Aluno</span>
+                <span className="font-medium">{aluno?.NOME ?? ra}</span>
+              </div>
+              {theme && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Escola</span>
+                  <span className="font-medium">{theme.nomeEscola}</span>
+                </div>
+              )}
+              {contrato && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Valor final</span>
+                    <span className="font-semibold" style={{ color: 'var(--cor-primaria, #1e40af)' }}>
+                      {moeda(contrato.VALORFINAL)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Pagamento</span>
+                    <span>{FORMA_LABELS[formaPagamento] ?? formaPagamento}</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                ref={confirmBtnRef}
+                className="flex-1"
+                style={{ background: 'linear-gradient(135deg, var(--cor-primaria, #1e40af), var(--cor-secundaria, #1e3a8a))' }}
+                onClick={() => void handleConfirmar()}
+                disabled={submitting}
+              >
+                Confirmar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-lg font-semibold">Assinatura Digital</h1>
 
       {/* Resumo */}
@@ -163,7 +260,7 @@ export default function AssinaturaPage() {
         </div>
       </div>
 
-      {/* Tarefa 2.C: assinatura como momento positivo — sem vermelho agressivo */}
+      {/* Mensagem positiva */}
       <div
         className="rounded-xl px-4 py-3"
         style={{
@@ -188,7 +285,7 @@ export default function AssinaturaPage() {
           className="flex-1"
           disabled={!aceiteTermos || submitting}
           style={{ backgroundColor: 'var(--cor-primaria, #1e40af)' }}
-          onClick={handleConfirmar}
+          onClick={() => setModalOpen(true)}
         >
           {submitting ? 'Confirmando…' : 'Confirmar Matrícula'}
         </Button>

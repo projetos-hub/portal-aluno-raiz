@@ -20,13 +20,16 @@ test('fluxo completo: login → selecao → rematricula → assinatura → concl
   })
   await page.getByRole('button', { name: /confirmar e assinar/i }).click()
 
-  // 4. Assinatura — aguarda checkbox carregar, aceita termos e confirma
+  // 4. Assinatura — aguarda checkbox carregar, aceita termos e abre modal de confirmação
   await page.waitForURL(/\/assinatura\?/)
-  // Radix Checkbox: botão visível tem role="checkbox"; o <input id="aceite-termos"> é oculto
   const checkbox = page.getByRole('checkbox').first()
   await expect(checkbox).toBeVisible({ timeout: 10_000 })
   await checkbox.click()
+  // Clicar "Confirmar Matrícula" agora abre o modal (não submete direto)
   await page.getByRole('button', { name: /confirmar matrícula/i }).click()
+  // Confirmar dentro do modal
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.getByRole('dialog').getByRole('button', { name: /confirmar/i }).click()
 
   // 5. Conclusao — verifica mensagem final
   await page.waitForURL(/\/conclusao/)
