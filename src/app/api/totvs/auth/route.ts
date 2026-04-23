@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? req.headers.get('x-real-ip') ?? 'unknown'
   const { allowed, retryAfterMs } = checkRateLimit(ip)
   if (!allowed) {
+    void logAuthAttempt(`[rate-limited] ${ip}`, false, 0)
     return NextResponse.json(
       { error: 'Too many requests', retryAfter: Math.ceil(retryAfterMs / 1000) },
       { status: 429, headers: { 'Retry-After': String(Math.ceil(retryAfterMs / 1000)) } },

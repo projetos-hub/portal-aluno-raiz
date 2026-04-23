@@ -15,5 +15,6 @@ export const config = {
     '/contrato/:path*',
     '/assinatura/:path*',
     '/conclusao/:path*',
+    '/disciplinas/:path*',
   ],
 }

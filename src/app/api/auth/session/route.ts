@@ -8,12 +8,13 @@ export async function POST(req: NextRequest) {
   }
   const res = NextResponse.json({ ok: true })
   const opts = {
-    httpOnly: true,
+    httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax' as const,
     maxAge: expiresIn,
     path: '/',
   }
+  // Single source of truth — readable by proxy.ts (req.cookies) and auth.ts (document.cookie)
   res.cookies.set('portal_token', token, opts)
   res.cookies.set('portal_user', JSON.stringify(user), opts)
   return res
