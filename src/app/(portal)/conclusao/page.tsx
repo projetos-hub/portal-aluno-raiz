@@ -4,6 +4,15 @@ import { useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
+const CONFETTI_COLORS = ['#F0C020', '#2060B0', '#60C080', '#E05080', '#8060C0', '#20A0E0']
+const CONFETTI_PIECES = Array.from({ length: 18 }, (_, i) => ({
+  id: i,
+  color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+  left: `${5 + (i * 5.5) % 90}%`,
+  delay: `${(i * 0.07).toFixed(2)}s`,
+  size: i % 3 === 0 ? '10px' : i % 3 === 1 ? '6px' : '8px',
+}))
+
 export default function ConclusaoPage() {
   const params = useSearchParams()
   const router = useRouter()
@@ -24,7 +33,26 @@ export default function ConclusaoPage() {
   return (
     // Tarefa 2.D: animação de entrada + protocolo copiável
     <div className="max-w-md mx-auto text-center space-y-6 py-12 animate-fade-up">
-      <div className="text-6xl">{sucesso ? '✅' : '⏳'}</div>
+      {/* Confetti CSS para celebração no sucesso */}
+      {sucesso && (
+        <div className="pointer-events-none fixed inset-0 overflow-hidden z-0" aria-hidden>
+          {CONFETTI_PIECES.map(p => (
+            <div
+              key={p.id}
+              className="confetti-piece"
+              style={{
+                left: p.left,
+                backgroundColor: p.color,
+                width: p.size,
+                height: p.size,
+                animationDelay: p.delay,
+                animationDuration: `${1.0 + (p.id % 4) * 0.2}s`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+      <div className="text-6xl relative z-10">{sucesso ? '✅' : '⏳'}</div>
 
       <div className="space-y-2">
         <h1 className="text-2xl font-bold tracking-tight">

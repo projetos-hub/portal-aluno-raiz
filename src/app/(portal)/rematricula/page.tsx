@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { totvs } from '@/lib/totvs/client'
 import type { EduAluno, EduMatricula, EduContrato } from '@/lib/totvs/types'
@@ -21,6 +21,31 @@ function moeda(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
+function useAnimatedValue(target: number, duration = 800) {
+  const [value, setValue] = useState(0)
+  const rafRef = useRef<number | null>(null)
+  const start = useCallback(() => {
+    const startTime = performance.now()
+    const startVal = 0
+    const animate = (now: number) => {
+      const elapsed = now - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setValue(Math.round(startVal + (target - startVal) * eased))
+      if (progress < 1) rafRef.current = requestAnimationFrame(animate)
+    }
+    rafRef.current = requestAnimationFrame(animate)
+  }, [target, duration])
+
+  useEffect(() => {
+    if (target > 0) start()
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
+  }, [target, start])
+
+  return value
+}
+
 export default function RematriculaPage() {
   const router = useRouter()
   const params = useSearchParams()
@@ -34,6 +59,9 @@ export default function RematriculaPage() {
   const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>('PIX')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Hooks devem ser chamados antes de qualquer early return (Rules of Hooks)
+  const valorFinalAnimado = useAnimatedValue(contrato?.VALORFINAL ?? 0)
 
   useEffect(() => {
     if (!ra || !codColigada) return
@@ -147,7 +175,7 @@ export default function RematriculaPage() {
             <Separator />
             <div className="flex justify-between font-semibold text-base">
               <span>Valor final</span>
-              <span>{moeda(contrato.VALORFINAL)}</span>
+              <span className="tabular-nums">{moeda(valorFinalAnimado)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
               <span>Parcelas</span>
