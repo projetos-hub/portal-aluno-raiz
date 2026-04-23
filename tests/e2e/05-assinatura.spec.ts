@@ -13,20 +13,51 @@ test('botão Confirmar está desabilitado sem aceite', async ({ page }) => {
 })
 
 test('marcar checkbox de aceite habilita o botão', async ({ page }) => {
-  // Aguarda dados carregarem (checkbox aparece após loading)
-  // Radix Checkbox renderiza o botão visível com role="checkbox"; o <input id="aceite-termos">
-  // é o input oculto para formulários nativos (aria-hidden=true). Selecionar pelo role evita ambiguidade.
   const checkbox = page.getByRole('checkbox').first()
   await expect(checkbox).toBeVisible()
   await checkbox.click()
   await expect(page.getByRole('button', { name: /confirmar matrícula/i })).toBeEnabled()
 })
 
-test('submit navega para /conclusao com status=sucesso', async ({ page }) => {
+test('clicar Confirmar Matrícula abre modal de confirmação', async ({ page }) => {
   const checkbox = page.getByRole('checkbox').first()
   await expect(checkbox).toBeVisible()
   await checkbox.click()
   await page.getByRole('button', { name: /confirmar matrícula/i }).click()
+  // Modal deve aparecer com role=dialog
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await expect(page.getByText(/confirmar rematrícula/i)).toBeVisible()
+})
+
+test('modal exibe nome do aluno e valor final', async ({ page }) => {
+  const checkbox = page.getByRole('checkbox').first()
+  await checkbox.click()
+  await page.getByRole('button', { name: /confirmar matrícula/i }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  // Dados do aluno e financeiros visíveis no modal
+  await expect(page.getByText('Lucas Torres Silva').first()).toBeVisible()
+  await expect(page.getByText(/R\$/).first()).toBeVisible()
+})
+
+test('botão Cancelar no modal fecha o dialog', async ({ page }) => {
+  const checkbox = page.getByRole('checkbox').first()
+  await checkbox.click()
+  await page.getByRole('button', { name: /confirmar matrícula/i }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  // Cancelar fecha o modal
+  await page.getByRole('button', { name: /cancelar/i }).click()
+  await expect(page.getByRole('dialog')).not.toBeVisible()
+})
+
+test('confirmar no modal navega para /conclusao com status=sucesso', async ({ page }) => {
+  const checkbox = page.getByRole('checkbox').first()
+  await expect(checkbox).toBeVisible()
+  await checkbox.click()
+  // Abre modal
+  await page.getByRole('button', { name: /confirmar matrícula/i }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  // Confirma no modal
+  await page.getByRole('dialog').getByRole('button', { name: /confirmar/i }).click()
   await page.waitForURL(/\/conclusao\?.*status=sucesso/)
   await expect(page).toHaveURL(/\/conclusao\?.*status=sucesso/)
 })
