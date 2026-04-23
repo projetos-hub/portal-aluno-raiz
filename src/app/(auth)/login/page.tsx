@@ -54,10 +54,15 @@ export default function LoginPage() {
         alunosRA: [],
       }
 
-      // Seta cookies client-readable (lidos por getSession() no layout).
-      // /api/auth/session usa httpOnly=true com mesmo nome (portal_token) — sobrescreve
-      // o cookie não-httpOnly, impedindo getSession() de funcionar. Não chamar aqui.
+      // Seta cookies — PR #8 tornou /api/auth/session httpOnly=false, sem conflito
       setSession(data.token, data.expiresIn, user)
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        void fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: data.token, expiresIn: data.expiresIn, user }),
+        })
+      }
       router.push('/selecao')
     } catch {
       setError('Erro de conexão. Tente novamente.')
