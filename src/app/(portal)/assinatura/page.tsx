@@ -48,8 +48,8 @@ export default function AssinaturaPage() {
   }, [ra, codColigada, codFilial])
 
   // Workaround: DataServerParamsSchema exige codColigada em URL params para POST
-  // mas totvs.post() só adiciona params na URL para GET (bug no client.ts do Agente 1).
-  async function totvsSend(endpoint: string, data: unknown) {
+  // mas totvs.post() só adiciona params na URL para GET (bug no client.ts — Agente 1).
+  async function totvsSend<T = Record<string, unknown>>(endpoint: string, data: unknown): Promise<T[]> {
     const qs = new URLSearchParams({ codColigada: String(codColigada), codFilial: String(codFilial) })
     const res = await fetch(`/api/totvs/rest/${endpoint}?${qs.toString()}`, {
       method: 'POST',
@@ -57,6 +57,8 @@ export default function AssinaturaPage() {
       body: JSON.stringify(data),
     })
     if (!res.ok) throw new Error(`${endpoint} POST falhou: ${res.status}`)
+    const json = (await res.json()) as { data?: T[] }
+    return json.data ?? []
   }
 
   async function handleConfirmar() {
@@ -65,13 +67,15 @@ export default function AssinaturaPage() {
     setErro(null)
 
     try {
-      await totvsSend('EduMatriculaData', {
+      // Fix 3: capturar IDMATRICULA do response para exibir como protocolo na conclusão
+      const matData = await totvsSend<{ IDMATRICULA?: string }>('EduMatriculaData', {
         RA: ra,
         CODCOLIGADA: codColigada,
         CODFILIAL: codFilial,
         CODPERIODO: contrato.CODPERIODO,
         TIPOINGRESSO: 'REMATRICULA',
       })
+      const idMatricula = matData[0]?.IDMATRICULA ?? ''
 
       await totvsSend('EduContratoData', {
         RA: ra,
@@ -82,7 +86,9 @@ export default function AssinaturaPage() {
         ACEITEAUTORIZADEBITO: aceiteDebito,
       })
 
-      router.push('/conclusao?status=sucesso')
+      const params = new URLSearchParams({ status: 'sucesso' })
+      if (idMatricula) params.set('idMatricula', idMatricula)
+      router.push(`/conclusao?${params.toString()}`)
     } catch {
       setErro('Erro ao confirmar matrícula. Tente novamente.')
     } finally {
