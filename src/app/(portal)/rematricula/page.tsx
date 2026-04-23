@@ -189,7 +189,7 @@ export default function RematriculaPage() {
         <Button
           variant="outline"
           className="flex-1"
-          onClick={() => router.push(`/contrato?ra=${ra}&codColigada=${codColigada}&codFilial=${codFilial}`)}
+          onClick={() => router.push(`/disciplinas?ra=${ra}&codColigada=${codColigada}&codFilial=${codFilial}&formaPagamento=${formaPagamento}`)}
         >
           Ver Contrato PDF
         </Button>
