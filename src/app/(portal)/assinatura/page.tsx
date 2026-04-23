@@ -75,7 +75,8 @@ export default function AssinaturaPage() {
   }, [modalOpen])
 
   async function handleConfirmar() {
-    if (!aceiteTermos || !aluno || !contrato) return
+    // aceiteTermos é o único bloqueio — aluno/contrato podem ser null em cenários de erro
+    if (!aceiteTermos) return
     setModalOpen(false)
     setSubmitting(true)
     setErro(null)
@@ -84,14 +85,17 @@ export default function AssinaturaPage() {
       const urlParams = { codColigada, codFilial }
       const matRes = await totvs.post<{ IDMATRICULA?: string }>(
         'EduMatriculaData',
-        { RA: ra, CODCOLIGADA: codColigada, CODFILIAL: codFilial, CODPERIODO: contrato.CODPERIODO, TIPOINGRESSO: 'REMATRICULA' },
+        { RA: ra, CODCOLIGADA: codColigada, CODFILIAL: codFilial, CODPERIODO: contrato?.CODPERIODO ?? '', TIPOINGRESSO: 'REMATRICULA' },
         urlParams,
       )
+      // Detecta erros TOTVS retornados com HTTP 200 mas type='error' nas mensagens
+      const totvError = matRes.messages?.find(m => m.type === 'error')
+      if (totvError) throw new Error(totvError.detail)
       const idMatricula = matRes.data?.[0]?.IDMATRICULA ?? ''
 
       await totvs.post(
         'EduContratoData',
-        { RA: ra, CODCOLIGADA: codColigada, CODFILIAL: codFilial, IDCONTRATO: contrato.IDCONTRATO, FORMAPAGAMENTO: formaPagamento, ACEITEAUTORIZADEBITO: aceiteDebito },
+        { RA: ra, CODCOLIGADA: codColigada, CODFILIAL: codFilial, IDCONTRATO: contrato?.IDCONTRATO ?? 0, FORMAPAGAMENTO: formaPagamento, ACEITEAUTORIZADEBITO: aceiteDebito },
         urlParams,
       )
 
