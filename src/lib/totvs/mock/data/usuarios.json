@@ -48,5 +48,15 @@
     "codColigada": 8,
     "codFilial": 1,
     "alunosRA": ["2024009"]
+  },
+  {
+    "id": 99,
+    "email": "lucas.mesquita@raizeducacao.com.br",
+    "senha": "Raiz@2026",
+    "nome": "Lucas Mesquita",
+    "cpf": "000.000.000-00",
+    "codColigada": 8,
+    "codFilial": 1,
+    "alunosRA": ["2024099"]
   }
 ]
