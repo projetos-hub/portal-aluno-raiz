@@ -160,5 +160,21 @@
     "CODSERIE": "8EF",
     "CODTURNO": "M",
     "SITUACAO": "ATIVO"
+  },
+  {
+    "CODCOLIGADA": 8,
+    "CODFILIAL": 1,
+    "RA": "2024099",
+    "NOME": "Pedro Lucas Mesquita",
+    "CPF": "000.000.000-99",
+    "DTNASCIMENTO": "2009-07-14",
+    "SEXO": "M",
+    "EMAIL": "pedro@email.com",
+    "SERIE": "1 ANO",
+    "TURNO": "MANHA",
+    "NOMECURSO": "Ensino Medio Regular",
+    "CODIGOCURSO": "EM001",
+    "CODPERIODO": "2026/1",
+    "SITUACAO": "ATIVO"
   }
 ]

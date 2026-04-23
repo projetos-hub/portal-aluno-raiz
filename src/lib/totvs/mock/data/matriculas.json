@@ -278,5 +278,17 @@
     "SITUACAO": "ATIVO",
     "DTMATRICULA": "2026-01-22",
     "TIPOINGRESSO": "REMATRICULA"
+  },
+  {
+    "RA": "2024099",
+    "CODCOLIGADA": 8,
+    "CODFILIAL": 1,
+    "SITUACAO": "ATIVO",
+    "TIPO": "REMATRICULA",
+    "PERIODO": "2026/1",
+    "DATASITUACAO": "2025-12-01",
+    "NOMECURSO": "Ensino Medio Regular",
+    "SERIE": "1 ANO",
+    "TURNO": "MANHA"
   }
 ]
