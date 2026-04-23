@@ -181,7 +181,7 @@ export default function SelecaoPage() {
   return (
     <div className="max-w-lg mx-auto space-y-3">
       <h1 className="text-lg font-semibold mb-4">Selecione o aluno</h1>
-      {cards.map(({ aluno, matricula }, index) => {
+      {visibleCards.map(({ aluno, matricula }, index) => {
         const key = `${aluno.CODCOLIGADA}-${aluno.RA}`
         const hist = historico[key]
 
