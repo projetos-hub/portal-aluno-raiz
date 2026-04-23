@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export function proxy(req: NextRequest) {
-  const token =
-    req.cookies.get('portal_token_http')?.value ??
-    req.cookies.get('portal_token')?.value
+  const token = req.cookies.get('portal_token')?.value
   if (!token) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
@@ -17,5 +15,6 @@ export const config = {
     '/contrato/:path*',
     '/assinatura/:path*',
     '/conclusao/:path*',
+    '/disciplinas/:path*',
   ],
 }
