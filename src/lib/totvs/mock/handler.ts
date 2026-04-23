@@ -180,6 +180,16 @@ export async function mockHandler(
     return handleEduTurmaDisc(params)
   }
 
+  // Mock webhook de pagamento — só para testes locais
+  if (ds === 'webhooks/pagamento' || ds === 'webhooks-pagamento' || ds === 'pagamento') {
+    const payload = (body ?? {}) as Record<string, unknown>
+    return {
+      messages: [],
+      length: 1,
+      data: [{ ok: true, IDMATRICULA: payload.IDMATRICULA ?? null, status: payload.status ?? 'pago' }],
+    }
+  }
+
   console.warn(`[mock] DataServer não reconhecido: "${dataserver}" (normalizado: "${ds}"). Retornando EMPTY_RESPONSE.`)
   return EMPTY_RESPONSE
 }
