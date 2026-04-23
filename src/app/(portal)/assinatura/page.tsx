@@ -131,15 +131,20 @@ export default function AssinaturaPage() {
       <Separator />
 
       {/* Checkboxes */}
-      <div className="space-y-3">
+      <div className="space-y-3" role="group" aria-label="Termos de aceite">
         <div className="flex items-start gap-3">
           <Checkbox
             id="aceite-termos"
             checked={aceiteTermos}
             onCheckedChange={v => setAceiteTermos(v === true)}
+            aria-describedby="aceite-termos-desc"
+            aria-required="true"
           />
           <Label htmlFor="aceite-termos" className="text-sm leading-relaxed cursor-pointer">
-            Li e aceito os termos do contrato de matrícula
+            <span id="aceite-termos-desc">
+              Li e aceito os termos do contrato de matrícula
+              <span className="sr-only"> (obrigatório para confirmar)</span>
+            </span>
           </Label>
         </div>
         <div className="flex items-start gap-3">
@@ -147,9 +152,13 @@ export default function AssinaturaPage() {
             id="aceite-debito"
             checked={aceiteDebito}
             onCheckedChange={v => setAceiteDebito(v === true)}
+            aria-describedby="aceite-debito-desc"
           />
           <Label htmlFor="aceite-debito" className="text-sm leading-relaxed cursor-pointer text-muted-foreground">
-            Autorizo desconto em folha / débito automático (opcional)
+            <span id="aceite-debito-desc">
+              Autorizo desconto em folha / débito automático
+              <span className="sr-only"> (opcional)</span>
+            </span>
           </Label>
         </div>
       </div>

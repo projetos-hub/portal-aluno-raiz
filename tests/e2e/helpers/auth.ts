@@ -3,7 +3,8 @@ import type { Page } from '@playwright/test'
 export async function loginViaUI(page: Page, email: string, password: string) {
   await page.goto('/login')
   await page.getByLabel(/e-?mail/i).fill(email)
-  await page.getByLabel(/senha/i).fill(password)
+  // Usar label exato 'Senha' para evitar conflito com aria-label do toggle de senha
+  await page.locator('#password').fill(password)
   await page.getByRole('button', { name: /entrar/i }).click()
 }
 

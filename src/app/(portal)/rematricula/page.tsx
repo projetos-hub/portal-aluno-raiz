@@ -191,13 +191,20 @@ export default function RematriculaPage() {
             </div>
             <Separator />
             <div className="space-y-2">
-              <p className="text-muted-foreground">Forma de pagamento</p>
-              <div className="flex gap-2 flex-wrap">
+              <p className="text-muted-foreground" id="forma-pagamento-label">Forma de pagamento</p>
+              <div
+                role="radiogroup"
+                aria-labelledby="forma-pagamento-label"
+                className="flex gap-2 flex-wrap"
+              >
                 {(['PIX', 'BOLETO', 'DEBITO'] as FormaPagamento[]).map(f => (
                   <button
                     key={f}
+                    role="radio"
+                    aria-checked={formaPagamento === f}
+                    aria-label={`Pagar com ${FORMA_LABELS[f]}`}
                     onClick={() => setFormaPagamento(f)}
-                    className={`px-4 py-2.5 rounded-md border text-sm transition-colors min-h-[44px] ${
+                    className={`px-4 py-2.5 rounded-md border text-sm transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                       formaPagamento === f
                         ? 'border-[var(--cor-primaria,#1e40af)] bg-[var(--cor-primaria,#1e40af)]/10 font-medium'
                         : 'border-border hover:bg-muted'
