@@ -30,6 +30,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname()
   const [theme, setTheme] = useState<BrandTheme | null>(null)
   const [mounted, setMounted] = useState(false)
+  // Fix 1: fallback quando logo não carrega (ex: arquivo não encontrado em produção)
+  const [logoError, setLogoError] = useState(false)
 
   useEffect(() => {
     const session = getSession()
@@ -84,7 +86,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         }}
       >
         <div className="flex items-center gap-4">
-          {theme ? (
+          {theme && !logoError ? (
             <Image
               src={`/logos/${theme.logoFile}`}
               alt={theme.marca}
@@ -92,7 +94,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               height={32}
               priority
               className="object-contain brightness-0 invert"
+              onError={() => setLogoError(true)}
             />
+          ) : theme ? (
+            <span className="text-sm font-bold tracking-tight">{theme.marca}</span>
           ) : (
             <Image
               src="/logo-raiz.svg"
