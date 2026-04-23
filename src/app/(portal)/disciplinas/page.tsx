@@ -42,6 +42,8 @@ export default function DisciplinasPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
+  // Toast de erro — aparece brevemente em caso de falha (rede, timeout)
+  const [toastVisible, setToastVisible] = useState(false)
 
   // Estado das seleções: codOferta → codTurma selecionada
   const [turmasSelecionadas, setTurmasSelecionadas] = useState<Record<string, string>>({})
@@ -50,6 +52,7 @@ export default function DisciplinasPage() {
 
   const retry = useCallback(() => {
     setError(null)
+    setToastVisible(false)
     setLoading(true)
     setRetryCount(c => c + 1)
   }, [])
@@ -76,7 +79,10 @@ export default function DisciplinasPage() {
         }
         setTurmasSelecionadas(preSelected)
       } catch {
-        setError('Não foi possível carregar as disciplinas. Tente novamente.')
+        setError('Não foi possível salvar as disciplinas. Tente novamente.')
+        setToastVisible(true)
+        // Toast auto-dismiss após 5 segundos
+        setTimeout(() => setToastVisible(false), 5_000)
       } finally {
         setLoading(false)
       }
@@ -148,6 +154,30 @@ export default function DisciplinasPage() {
   if (error) {
     return (
       <div className="max-w-lg mx-auto animate-fade-up">
+        {/* Toast flutuante de erro — aparece no topo e auto-dismisses */}
+        {toastVisible && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl bg-destructive px-5 py-3 text-sm text-white shadow-lg animate-fade-up"
+          >
+            <span>{error}</span>
+            <button
+              onClick={retry}
+              className="shrink-0 rounded-md bg-white/20 px-2.5 py-1 text-xs font-medium hover:bg-white/30 transition-colors"
+            >
+              Tentar novamente
+            </button>
+            <button
+              onClick={() => setToastVisible(false)}
+              aria-label="Fechar aviso"
+              className="ml-1 opacity-70 hover:opacity-100 transition-opacity"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+        {/* Fallback inline para acessibilidade (toast pode ser perdido por screen readers) */}
         <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 space-y-3">
           <p className="text-destructive text-sm">{error}</p>
           <Button variant="outline" size="sm" onClick={retry}>
