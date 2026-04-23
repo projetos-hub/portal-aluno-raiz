@@ -50,6 +50,46 @@
     "alunosRA": ["2024009"]
   },
   {
+    "id": 8,
+    "email": "apogeu.teste@email.com",
+    "senha": "123456",
+    "nome": "Fernanda Rocha",
+    "cpf": "567.890.123-08",
+    "codColigada": 18,
+    "codFilial": 2,
+    "alunosRA": ["2026001"]
+  },
+  {
+    "id": 9,
+    "email": "globaltree.teste@email.com",
+    "senha": "123456",
+    "nome": "Ricardo Lima",
+    "cpf": "678.901.234-09",
+    "codColigada": 9,
+    "codFilial": 2,
+    "alunosRA": ["2026002", "2026003"]
+  },
+  {
+    "id": 10,
+    "email": "unificado.teste@email.com",
+    "senha": "123456",
+    "nome": "Paulo Souza",
+    "cpf": "789.012.345-10",
+    "codColigada": 11,
+    "codFilial": 1,
+    "alunosRA": ["2026004"]
+  },
+  {
+    "id": 11,
+    "email": "leo.davinci@email.com",
+    "senha": "123456",
+    "nome": "Claudia Azevedo",
+    "cpf": "890.123.456-11",
+    "codColigada": 12,
+    "codFilial": 1,
+    "alunosRA": ["2026005"]
+  },
+  {
     "id": 99,
     "email": "lucas.mesquita@raizeducacao.com.br",
     "senha": "Raiz@2026",
