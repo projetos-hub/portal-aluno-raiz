@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { totvs } from '@/lib/totvs/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -40,11 +40,19 @@ export default function DisciplinasPage() {
   const [ofertas, setOfertas] = useState<Oferta[]>([])
   const [turmas, setTurmas] = useState<TurmaDisc[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
 
   // Estado das seleções: codOferta → codTurma selecionada
   const [turmasSelecionadas, setTurmasSelecionadas] = useState<Record<string, string>>({})
   // Optativas selecionadas
   const [optativasSelecionadas, setOptativasSelecionadas] = useState<Set<string>>(new Set())
+
+  const retry = useCallback(() => {
+    setError(null)
+    setLoading(true)
+    setRetryCount(c => c + 1)
+  }, [])
 
   useEffect(() => {
     if (!codColigada) return
@@ -67,12 +75,14 @@ export default function DisciplinasPage() {
           if (primeiraTurma) preSelected[o.CODOFERTA] = primeiraTurma.CODTURMA
         }
         setTurmasSelecionadas(preSelected)
+      } catch {
+        setError('Não foi possível carregar as disciplinas. Tente novamente.')
       } finally {
         setLoading(false)
       }
     }
     void load()
-  }, [codColigada, codFilial])
+  }, [codColigada, codFilial, retryCount])
 
   const obrigatorias = ofertas.filter(o => o.TIPO === 'OBRIGATORIA')
   const optativas = ofertas.filter(o => o.TIPO === 'OPTATIVA')
@@ -131,6 +141,19 @@ export default function DisciplinasPage() {
           <div key={i} className="h-16 rounded-xl border bg-muted/30 animate-pulse" aria-hidden="true" />
         ))}
         <span className="sr-only">Aguarde, carregando as disciplinas disponíveis.</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-lg mx-auto animate-fade-up">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 space-y-3">
+          <p className="text-destructive text-sm">{error}</p>
+          <Button variant="outline" size="sm" onClick={retry}>
+            Tentar novamente
+          </Button>
+        </div>
       </div>
     )
   }
