@@ -43,7 +43,12 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     const { codColigada, codFilial } = session.user
     if (codColigada) {
       try {
-        setTheme(getBrandTheme(codColigada, codFilial))
+        const newTheme = getBrandTheme(codColigada, codFilial)
+        setTheme(prev => {
+          // Reseta logoError quando a escola muda (troca de usuário/escola)
+          if (prev?.slug !== newTheme.slug) setLogoError(false)
+          return newTheme
+        })
       } catch {
         // Escola não mapeada — layout sem tema dinâmico
       }
