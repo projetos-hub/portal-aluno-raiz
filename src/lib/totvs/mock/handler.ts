@@ -40,8 +40,8 @@ async function handleEduAluno(params: Record<string, string>): Promise<TotvsResp
   const codFilial = params.codFilial ? Number(params.codFilial) : null
   const ra = params.RA ?? params.ra ?? null
 
-  // Edge case: simulated timeout
-  if (ra === 'RA-TIMEOUT') {
+  // Edge case: simulated timeout (aliases: RA-TIMEOUT e TIMEOUT-001)
+  if (ra === 'RA-TIMEOUT' || ra === 'TIMEOUT-001') {
     await new Promise(r => setTimeout(r, 5000))
     return EMPTY_RESPONSE as TotvsResponse<EduAluno>
   }
@@ -69,6 +69,16 @@ function handleEduMatriculaGet(params: Record<string, string>): TotvsResponse<Ed
 
 function handleEduMatriculaPost(body: unknown): TotvsResponse<unknown> {
   const payload = (body ?? {}) as Record<string, unknown>
+
+  // Edge case: simulated TOTVS validation error — pendência financeira
+  if (payload.RA === 'ERR-001' || payload.ra === 'ERR-001') {
+    return {
+      messages: [{ code: '0422', type: 'error', detail: 'Matrícula não permitida — pendência financeira.' }],
+      length: 0,
+      data: null,
+    }
+  }
+
   return {
     messages: [],
     length: 1,
