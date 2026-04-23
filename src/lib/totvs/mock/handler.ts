@@ -4,6 +4,8 @@ import matriculasData from './data/matriculas.json'
 import contratosData from './data/contratos.json'
 import usuariosData from './data/usuarios.json'
 import coligadasData from './data/coligadas.json'
+import ofertasData from './data/ofertas.json'
+import turmadiscData from './data/turmadisc.json'
 
 const EMPTY_RESPONSE: TotvsResponse<never> = {
   messages: [{ code: '0003', type: 'info', detail: 'Nenhum registro foi encontrado no banco de dados.' }],
@@ -96,6 +98,34 @@ function handleEduContratoPost(body: unknown): TotvsResponse<unknown> {
   }
 }
 
+function handleEduOferta(params: Record<string, string>): TotvsResponse<unknown> {
+  const codColigada = params.codColigada ? Number(params.codColigada) : null
+  const codFilial = params.codFilial ? Number(params.codFilial) : null
+  const codPeriodo = params.codPeriodo ?? params.CODPERIODO ?? null
+
+  let result = ofertasData as Array<{ CODCOLIGADA: number; CODFILIAL: number; CODPERIODO: string }>
+  if (codColigada !== null) result = result.filter(o => o.CODCOLIGADA === codColigada)
+  if (codFilial !== null) result = result.filter(o => o.CODFILIAL === codFilial)
+  if (codPeriodo !== null) result = result.filter(o => o.CODPERIODO === codPeriodo)
+
+  if (result.length === 0) return EMPTY_RESPONSE
+  return { messages: [], length: result.length, data: result }
+}
+
+function handleEduTurmaDisc(params: Record<string, string>): TotvsResponse<unknown> {
+  const codColigada = params.codColigada ? Number(params.codColigada) : null
+  const codFilial = params.codFilial ? Number(params.codFilial) : null
+  const codOferta = params.codOferta ?? params.CODOFERTA ?? null
+
+  let result = turmadiscData as Array<{ CODCOLIGADA: number; CODFILIAL: number; CODOFERTA: string }>
+  if (codColigada !== null) result = result.filter(t => t.CODCOLIGADA === codColigada)
+  if (codFilial !== null) result = result.filter(t => t.CODFILIAL === codFilial)
+  if (codOferta !== null) result = result.filter(t => t.CODOFERTA === codOferta)
+
+  if (result.length === 0) return EMPTY_RESPONSE
+  return { messages: [], length: result.length, data: result }
+}
+
 function handleEduColigadas(params: Record<string, string>): TotvsResponse<EduColigada> {
   const codColigada = params['codColigada'] ? Number(params['codColigada']) : null
   let resultado = coligadasData as EduColigada[]
@@ -130,6 +160,14 @@ export async function mockHandler(
 
   if (ds === 'educoligadasdata' || ds === 'educoligadas' || ds === 'coligadas') {
     return handleEduColigadas(params)
+  }
+
+  if (ds === 'eduofertadata' || ds === 'eduoferta') {
+    return handleEduOferta(params)
+  }
+
+  if (ds === 'eduturmadiscdata' || ds === 'eduturmadisc') {
+    return handleEduTurmaDisc(params)
   }
 
   console.warn(`[mock] DataServer não reconhecido: "${dataserver}" (normalizado: "${ds}"). Retornando EMPTY_RESPONSE.`)
