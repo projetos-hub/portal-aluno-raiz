@@ -14,6 +14,15 @@ const CONFETTI_PIECES = Array.from({ length: 18 }, (_, i) => ({
   size: i % 3 === 0 ? '10px' : i % 3 === 1 ? '6px' : '8px',
 }))
 
+const CONFETTI_COLORS = ['#F0C020', '#2060B0', '#60C080', '#E05080', '#8060C0', '#20A0E0']
+const CONFETTI_PIECES = Array.from({ length: 18 }, (_, i) => ({
+  id: i,
+  color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+  left: `${5 + (i * 5.5) % 90}%`,
+  delay: `${(i * 0.07).toFixed(2)}s`,
+  size: i % 3 === 0 ? '10px' : i % 3 === 1 ? '6px' : '8px',
+}))
+
 export default function ConclusaoPage() {
   const params = useSearchParams()
   const router = useRouter()
