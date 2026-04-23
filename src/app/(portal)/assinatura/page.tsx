@@ -59,16 +59,28 @@ export default function AssinaturaPage() {
     void load()
   }, [ra, codColigada, codFilial])
 
+  // Foca o botão "Confirmar" do modal ao abrir
+  useEffect(() => {
+    if (modalOpen) confirmBtnRef.current?.focus()
+  }, [modalOpen])
+
+  // Fechar modal com Escape
+  useEffect(() => {
+    if (!modalOpen) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setModalOpen(false)
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [modalOpen])
+
   async function handleConfirmar() {
-    // aceiteTermos é o único bloqueio — aluno/contrato podem ser null em cenários de erro
-    if (!aceiteTermos) return
+    if (!aceiteTermos || !aluno || !contrato) return
     setModalOpen(false)
     setSubmitting(true)
     setErro(null)
 
     try {
-      // Captura IDMATRICULA para exibir como protocolo na conclusão
-      // totvs.post() agora envia params na URL (PR #8 do Agente 1 — fix definitivo)
       const urlParams = { codColigada, codFilial }
       const matRes = await totvs.post<{ IDMATRICULA?: string }>(
         'EduMatriculaData',
@@ -83,9 +95,9 @@ export default function AssinaturaPage() {
         urlParams,
       )
 
-      const params = new URLSearchParams({ status: 'sucesso' })
-      if (idMatricula) params.set('idMatricula', idMatricula)
-      router.push(`/conclusao?${params.toString()}`)
+      const qs = new URLSearchParams({ status: 'sucesso' })
+      if (idMatricula) qs.set('idMatricula', idMatricula)
+      router.push(`/conclusao?${qs.toString()}`)
     } catch {
       setErro('Erro ao confirmar matrícula. Tente novamente.')
     } finally {
