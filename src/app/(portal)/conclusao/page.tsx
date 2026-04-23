@@ -79,7 +79,7 @@ export default function ConclusaoPage() {
               Número do protocolo
             </p>
             <p
-              className="text-xl font-mono font-bold tracking-wider"
+              className="text-xl font-mono font-bold tracking-wider break-all"
               style={{ color: 'var(--cor-primaria, #1e40af)' }}
             >
               {protocolo}

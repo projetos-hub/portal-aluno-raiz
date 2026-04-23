@@ -47,44 +47,27 @@ export default function AssinaturaPage() {
     void load()
   }, [ra, codColigada, codFilial])
 
-  // Workaround: DataServerParamsSchema exige codColigada em URL params para POST
-  // mas totvs.post() só adiciona params na URL para GET (bug no client.ts — Agente 1).
-  async function totvsSend<T = Record<string, unknown>>(endpoint: string, data: unknown): Promise<T[]> {
-    const qs = new URLSearchParams({ codColigada: String(codColigada), codFilial: String(codFilial) })
-    const res = await fetch(`/api/totvs/rest/${endpoint}?${qs.toString()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-    if (!res.ok) throw new Error(`${endpoint} POST falhou: ${res.status}`)
-    const json = (await res.json()) as { data?: T[] }
-    return json.data ?? []
-  }
-
   async function handleConfirmar() {
     if (!aceiteTermos || !aluno || !contrato) return
     setSubmitting(true)
     setErro(null)
 
     try {
-      // Fix 3: capturar IDMATRICULA do response para exibir como protocolo na conclusão
-      const matData = await totvsSend<{ IDMATRICULA?: string }>('EduMatriculaData', {
-        RA: ra,
-        CODCOLIGADA: codColigada,
-        CODFILIAL: codFilial,
-        CODPERIODO: contrato.CODPERIODO,
-        TIPOINGRESSO: 'REMATRICULA',
-      })
-      const idMatricula = matData[0]?.IDMATRICULA ?? ''
+      // Captura IDMATRICULA para exibir como protocolo na conclusão
+      // totvs.post() agora envia params na URL (PR #8 do Agente 1 — fix definitivo)
+      const urlParams = { codColigada, codFilial }
+      const matRes = await totvs.post<{ IDMATRICULA?: string }>(
+        'EduMatriculaData',
+        { RA: ra, CODCOLIGADA: codColigada, CODFILIAL: codFilial, CODPERIODO: contrato.CODPERIODO, TIPOINGRESSO: 'REMATRICULA' },
+        urlParams,
+      )
+      const idMatricula = matRes.data?.[0]?.IDMATRICULA ?? ''
 
-      await totvsSend('EduContratoData', {
-        RA: ra,
-        CODCOLIGADA: codColigada,
-        CODFILIAL: codFilial,
-        IDCONTRATO: contrato.IDCONTRATO,
-        FORMAPAGAMENTO: formaPagamento,
-        ACEITEAUTORIZADEBITO: aceiteDebito,
-      })
+      await totvs.post(
+        'EduContratoData',
+        { RA: ra, CODCOLIGADA: codColigada, CODFILIAL: codFilial, IDCONTRATO: contrato.IDCONTRATO, FORMAPAGAMENTO: formaPagamento, ACEITEAUTORIZADEBITO: aceiteDebito },
+        urlParams,
+      )
 
       const params = new URLSearchParams({ status: 'sucesso' })
       if (idMatricula) params.set('idMatricula', idMatricula)
