@@ -121,11 +121,16 @@ export default function DisciplinasPage() {
 
   if (loading) {
     return (
-      <div className="max-w-lg mx-auto space-y-4 pb-8 animate-fade-up">
-        <div className="h-7 w-48 rounded-md bg-muted animate-pulse" />
+      <div
+        role="status"
+        aria-label="Carregando disciplinas…"
+        className="max-w-lg mx-auto space-y-4 pb-8 animate-fade-up"
+      >
+        <div className="h-7 w-48 rounded-md bg-muted animate-pulse" aria-hidden="true" />
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-16 rounded-xl border bg-muted/30 animate-pulse" />
+          <div key={i} className="h-16 rounded-xl border bg-muted/30 animate-pulse" aria-hidden="true" />
         ))}
+        <span className="sr-only">Aguarde, carregando as disciplinas disponíveis.</span>
       </div>
     )
   }
@@ -157,20 +162,25 @@ export default function DisciplinasPage() {
               return (
                 <div key={o.CODOFERTA} className="space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 rounded-sm border-2 flex items-center justify-center"
-                      style={{ borderColor: 'var(--cor-primaria, #1e40af)', backgroundColor: 'var(--cor-primaria, #1e40af)' }}>
+                    {/* Checkbox decorativo — não interativo, apenas indica que está selecionado */}
+                    <div
+                      aria-hidden="true"
+                      className="h-4 w-4 rounded-sm border-2 flex items-center justify-center shrink-0"
+                      style={{ borderColor: 'var(--cor-primaria, #1e40af)', backgroundColor: 'var(--cor-primaria, #1e40af)' }}
+                    >
                       <svg className="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 12 12">
                         <path d="M10 3L5 8 2 5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>
                       </svg>
                     </div>
                     <span className="text-sm font-medium">{o.DISCIPLINA}</span>
-                    <Badge variant="secondary" className="text-[10px] ml-auto">obrigatória</Badge>
+                    <Badge variant="secondary" className="text-[10px] ml-auto" aria-label={`${o.DISCIPLINA} — obrigatória`}>obrigatória</Badge>
                   </div>
                   {ts.length > 1 && (
                     <select
                       value={selecionada ?? ''}
                       onChange={e => setTurmasSelecionadas(ts => ({ ...ts, [o.CODOFERTA]: e.target.value }))}
-                      className="ml-6 text-xs border rounded-md px-2 py-1 text-muted-foreground bg-background w-full max-w-xs"
+                      aria-label={`Turma de ${o.DISCIPLINA}`}
+                      className="ml-6 text-xs border rounded-md px-2 py-1 text-muted-foreground bg-background w-full max-w-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       {ts.map(t => (
                         <option key={t.CODTURMA} value={t.CODTURMA}>
@@ -214,6 +224,8 @@ export default function DisciplinasPage() {
                       id={`opt-${o.CODOFERTA}`}
                       checked={selecionada}
                       onCheckedChange={() => toggleOptativa(o.CODOFERTA)}
+                      aria-label={`Selecionar ${o.DISCIPLINA} — optativa`}
+                      className="focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     />
                     <Label
                       htmlFor={`opt-${o.CODOFERTA}`}
@@ -228,7 +240,8 @@ export default function DisciplinasPage() {
                         <select
                           value={turmaEscolhida ?? ''}
                           onChange={e => setTurmasSelecionadas(ts => ({ ...ts, [o.CODOFERTA]: e.target.value }))}
-                          className="text-xs border rounded-md px-2 py-1 text-muted-foreground bg-background w-full max-w-xs"
+                          aria-label={`Turma de ${o.DISCIPLINA}`}
+                          className="text-xs border rounded-md px-2 py-1 text-muted-foreground bg-background w-full max-w-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           {ts.map(t => (
                             <option key={t.CODTURMA} value={t.CODTURMA}>
