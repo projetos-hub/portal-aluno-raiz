@@ -18,13 +18,13 @@ test('exibe valor financeiro em BRL', async ({ page }) => {
 })
 
 test('seleção de forma de pagamento funciona', async ({ page }) => {
-  // PIX está selecionado por padrão (font-medium na classe)
-  await expect(page.getByRole('button', { name: 'Pix' })).toHaveClass(/font-medium/)
+  // Botões agora têm role="radio" (acessibilidade WCAG)
+  await expect(page.getByRole('radio', { name: /pix/i })).toHaveAttribute('aria-checked', 'true')
 
   // Clicar em Boleto muda a seleção
-  await page.getByRole('button', { name: 'Boleto bancário' }).click()
-  await expect(page.getByRole('button', { name: 'Boleto bancário' })).toHaveClass(/font-medium/)
-  await expect(page.getByRole('button', { name: 'Pix' })).not.toHaveClass(/font-medium/)
+  await page.getByRole('radio', { name: /boleto/i }).click()
+  await expect(page.getByRole('radio', { name: /boleto/i })).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByRole('radio', { name: /pix/i })).toHaveAttribute('aria-checked', 'false')
 })
 
 test('botão Ver Contrato navega para /disciplinas (nova tela de seleção)', async ({ page }) => {

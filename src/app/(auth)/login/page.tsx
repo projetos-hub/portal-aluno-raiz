@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [logoutMsg, setLogoutMsg] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     if (sessionStorage.getItem('logout_msg')) {
@@ -152,6 +153,8 @@ export default function LoginPage() {
                 required
                 autoComplete="email"
                 autoFocus
+                aria-label="Endereço de e-mail do responsável"
+                aria-required="true"
                 className="h-11 rounded-xl border-gray-200 focus:border-[var(--cor-primaria)] focus:ring-[var(--cor-primaria)]/20"
               />
             </div>
@@ -159,16 +162,38 @@ export default function LoginPage() {
               <Label htmlFor="password" className="text-sm font-medium text-gray-700">
                 Senha
               </Label>
+              <div className="relative">
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••"
                 required
                 autoComplete="current-password"
-                className="h-11 rounded-xl border-gray-200 focus:border-[var(--cor-primaria)] focus:ring-[var(--cor-primaria)]/20"
+                aria-label="Senha de acesso"
+                aria-required="true"
+                className="h-11 rounded-xl border-gray-200 focus:border-[var(--cor-primaria)] focus:ring-[var(--cor-primaria)]/20 pr-11"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(p => !p)}
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
+                {showPassword ? (
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                ) : (
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                )}
+              </button>
+              </div>
             </div>
 
             {error && (

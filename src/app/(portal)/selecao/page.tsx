@@ -227,14 +227,17 @@ export default function SelecaoPage() {
                   e.stopPropagation()
                   void toggleHistorico(aluno)
                 }}
+                aria-expanded={hist?.open ?? false}
+                aria-controls={`historico-${key}`}
+                aria-label={hist?.open ? `Ocultar histórico de ${aluno.NOME}` : `Ver histórico de rematrículas de ${aluno.NOME}`}
                 className="mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
               >
-                <span className="text-[10px]">{hist?.open ? '▲' : '▼'}</span>
+                <span className="text-[10px]" aria-hidden="true">{hist?.open ? '▲' : '▼'}</span>
                 {hist?.open ? 'Ocultar histórico' : 'Ver histórico de rematrículas'}
               </button>
 
               {hist?.open && (
-                <div className="mt-3 space-y-2 animate-fade-up">
+                <div id={`historico-${key}`} className="mt-3 space-y-2 animate-fade-up" role="region" aria-label={`Histórico de ${aluno.NOME}`}>
                   {hist.loading && (
                     <div className="space-y-1.5">
                       {[1, 2].map(i => (
