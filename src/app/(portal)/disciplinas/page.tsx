@@ -180,7 +180,7 @@ export default function DisciplinasPage() {
                       value={selecionada ?? ''}
                       onChange={e => setTurmasSelecionadas(ts => ({ ...ts, [o.CODOFERTA]: e.target.value }))}
                       aria-label={`Turma de ${o.DISCIPLINA}`}
-                      className="ml-6 text-xs border rounded-md px-2 py-1 text-muted-foreground bg-background w-full max-w-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="ml-6 text-xs border rounded-md px-2 py-2 min-h-[36px] text-muted-foreground bg-background w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       {ts.map(t => (
                         <option key={t.CODTURMA} value={t.CODTURMA}>
@@ -241,7 +241,7 @@ export default function DisciplinasPage() {
                           value={turmaEscolhida ?? ''}
                           onChange={e => setTurmasSelecionadas(ts => ({ ...ts, [o.CODOFERTA]: e.target.value }))}
                           aria-label={`Turma de ${o.DISCIPLINA}`}
-                          className="text-xs border rounded-md px-2 py-1 text-muted-foreground bg-background w-full max-w-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="text-xs border rounded-md px-2 py-2 min-h-[36px] text-muted-foreground bg-background w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           {ts.map(t => (
                             <option key={t.CODTURMA} value={t.CODTURMA}>
@@ -269,20 +269,20 @@ export default function DisciplinasPage() {
         </p>
       )}
 
-      {/* CTAs */}
+      {/* CTAs — min-h-[44px] para touch targets em 375px */}
       <div className="flex flex-col sm:flex-row gap-3 pt-2">
-        <Button variant="outline" className="flex-1" onClick={() => router.back()}>
+        <Button variant="outline" className="flex-1 min-h-[44px]" onClick={() => router.back()}>
           ← Voltar
         </Button>
         <Button
           variant="outline"
-          className="flex-1"
+          className="flex-1 min-h-[44px]"
           onClick={irParaContrato}
         >
           Ver Contrato PDF
         </Button>
         <Button
-          className="flex-1"
+          className="flex-1 min-h-[44px]"
           style={{ background: 'linear-gradient(135deg, var(--cor-primaria, #1e40af), var(--cor-secundaria, #1e3a8a))' }}
           onClick={irParaAssinatura}
         >
