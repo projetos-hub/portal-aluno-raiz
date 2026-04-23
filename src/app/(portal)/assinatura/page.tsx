@@ -137,7 +137,7 @@ export default function AssinaturaPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
-            className="bg-background rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4 animate-fade-up"
+            className="bg-background rounded-2xl shadow-2xl w-full max-w-sm p-4 sm:p-6 space-y-4 animate-fade-up"
           >
             <div>
               <h2 id="modal-title" className="text-lg font-semibold">
@@ -175,17 +175,18 @@ export default function AssinaturaPage() {
               )}
             </div>
 
-            <div className="flex gap-3">
+            {/* min-h-[44px] para touch targets em 375px */}
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
-                className="flex-1"
+                className="flex-1 min-h-[44px]"
                 onClick={() => setModalOpen(false)}
               >
                 Cancelar
               </Button>
               <Button
                 ref={confirmBtnRef}
-                className="flex-1"
+                className="flex-1 min-h-[44px]"
                 style={{ background: 'linear-gradient(135deg, var(--cor-primaria, #1e40af), var(--cor-secundaria, #1e3a8a))' }}
                 onClick={() => void handleConfirmar()}
                 disabled={submitting}
