@@ -55,6 +55,9 @@ export default function SelecaoPage() {
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const [historico, setHistorico] = useState<Record<string, HistoricoState>>({})
+  // Performance: exibe os primeiros 5 cards; "Ver mais" se houver >5 alunos
+  const PAGE_SIZE = 5
+  const [showAll, setShowAll] = useState(false)
 
   const retry = useCallback(() => {
     setError(null)
@@ -172,10 +175,13 @@ export default function SelecaoPage() {
     )
   }
 
+  const visibleCards = showAll ? cards : cards.slice(0, PAGE_SIZE)
+  const hiddenCount = cards.length - PAGE_SIZE
+
   return (
     <div className="max-w-lg mx-auto space-y-3">
       <h1 className="text-lg font-semibold mb-4">Selecione o aluno</h1>
-      {cards.map(({ aluno, matricula }, index) => {
+      {visibleCards.map(({ aluno, matricula }, index) => {
         const key = `${aluno.CODCOLIGADA}-${aluno.RA}`
         const hist = historico[key]
 
@@ -280,6 +286,16 @@ export default function SelecaoPage() {
           </Card>
         )
       })}
+
+      {/* Paginação: mostrar "Ver mais" quando há >5 alunos */}
+      {!showAll && hiddenCount > 0 && (
+        <button
+          onClick={() => setShowAll(true)}
+          className="w-full py-2.5 text-sm text-center rounded-xl border border-dashed text-muted-foreground hover:text-foreground hover:border-solid transition-colors"
+        >
+          Ver {hiddenCount} aluno{hiddenCount > 1 ? 's' : ''} restante{hiddenCount > 1 ? 's' : ''}
+        </button>
+      )}
     </div>
   )
 }
