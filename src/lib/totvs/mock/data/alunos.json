@@ -176,5 +176,45 @@
     "CODIGOCURSO": "EM001",
     "CODPERIODO": "2026/1",
     "SITUACAO": "ATIVO"
+  },
+  {
+    "CODCOLIGADA": 18, "CODFILIAL": 3, "RA": "2026001",
+    "NOME": "Ana Fernanda Costa", "CPF": "111.222.333-81",
+    "DTNASCIMENTO": "2010-04-18", "SEXO": "F",
+    "EMAIL": "ana.fernanda@email.com", "FONE": "(21) 99801-2601",
+    "CODCURSO": "EM", "CODHABILITACAO": "EM-REG", "CODGRADE": "EM-2024",
+    "CODPERIODO": "2026/1", "CODSERIE": "1EM", "CODTURNO": "M", "SITUACAO": "ATIVO"
+  },
+  {
+    "CODCOLIGADA": 9, "CODFILIAL": 2, "RA": "2026002",
+    "NOME": "Henrique Lima", "CPF": "222.333.444-92",
+    "DTNASCIMENTO": "2008-09-05", "SEXO": "M",
+    "EMAIL": "henrique.lima@email.com", "FONE": "(21) 99802-2602",
+    "CODCURSO": "EM", "CODHABILITACAO": "EM-REG", "CODGRADE": "EM-2024",
+    "CODPERIODO": "2026/1", "CODSERIE": "3EM", "CODTURNO": "M", "SITUACAO": "ATIVO"
+  },
+  {
+    "CODCOLIGADA": 9, "CODFILIAL": 2, "RA": "2026003",
+    "NOME": "Beatriz Lima", "CPF": "222.333.444-93",
+    "DTNASCIMENTO": "2013-01-22", "SEXO": "F",
+    "EMAIL": "beatriz.lima@email.com", "FONE": "(21) 99802-2603",
+    "CODCURSO": "EF", "CODHABILITACAO": "EF-REG", "CODGRADE": "EF-2024",
+    "CODPERIODO": "2026/1", "CODSERIE": "7EF", "CODTURNO": "T", "SITUACAO": "ATIVO"
+  },
+  {
+    "CODCOLIGADA": 11, "CODFILIAL": 1, "RA": "2026004",
+    "NOME": "Thiago Souza", "CPF": "333.444.555-04",
+    "DTNASCIMENTO": "2009-07-30", "SEXO": "M",
+    "EMAIL": "thiago.souza@email.com", "FONE": "(21) 99803-2604",
+    "CODCURSO": "EM", "CODHABILITACAO": "EM-REG", "CODGRADE": "EM-2024",
+    "CODPERIODO": "2026/1", "CODSERIE": "2EM", "CODTURNO": "M", "SITUACAO": "ATIVO"
+  },
+  {
+    "CODCOLIGADA": 12, "CODFILIAL": 1, "RA": "2026005",
+    "NOME": "Camila Azevedo", "CPF": "444.555.666-05",
+    "DTNASCIMENTO": "2011-11-08", "SEXO": "F",
+    "EMAIL": "camila.azevedo@email.com", "FONE": "(21) 99804-2605",
+    "CODCURSO": "EF", "CODHABILITACAO": "EF-REG", "CODGRADE": "EF-2024",
+    "CODPERIODO": "2026/1", "CODSERIE": "9EF", "CODTURNO": "M", "SITUACAO": "ATIVO"
   }
 ]
