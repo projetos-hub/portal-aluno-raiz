@@ -34,7 +34,7 @@ async function request<T>(
   return withRetry(async () => {
     let url = `${BASE}/rest/${dataserver}`
 
-    if (method === 'GET' && params) {
+    if (params) {
       const qs = new URLSearchParams(
         Object.entries(params).reduce<Record<string, string>>((acc, [k, v]) => {
           acc[k] = String(v)
