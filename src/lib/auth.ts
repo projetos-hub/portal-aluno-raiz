@@ -37,6 +37,7 @@ export function getSession(): { token: string; user: AuthUser } | null {
 export function clearSession(): void {
   deleteCookie(TOKEN_COOKIE)
   deleteCookie(USER_COOKIE)
+  void fetch('/api/auth/session', { method: 'DELETE' })
 }
 
 export function isAuthenticated(): boolean {
