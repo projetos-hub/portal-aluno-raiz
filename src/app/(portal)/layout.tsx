@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { getSession, clearSession } from '@/lib/auth'
@@ -25,36 +25,34 @@ function PortalHeaderSkeleton() {
   )
 }
 
+// useSyncExternalStore: padrão React 18 para detecção client-side sem setState em efeito
+const emptySubscribe = () => () => {}
+
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const [theme, setTheme] = useState<BrandTheme | null>(null)
-  const [mounted, setMounted] = useState(false)
-  // Fix 1: fallback quando logo não carrega (ex: arquivo não encontrado em produção)
   const [logoError, setLogoError] = useState(false)
+  // isMounted = false no servidor, true no cliente — sem useEffect + setMounted
+  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false)
 
   useEffect(() => {
-    const session = getSession()
-    if (!session) {
+    if (!getSession()) {
       router.push('/login')
-      return
     }
+  }, [router, pathname])
 
-    const { codColigada, codFilial } = session.user
-    if (codColigada) {
+  // Deriva tema da sessão em render — sem setState em efeito
+  let theme: BrandTheme | null = null
+  if (isMounted) {
+    const session = getSession()
+    if (session?.user.codColigada) {
       try {
-        const newTheme = getBrandTheme(codColigada, codFilial)
-        setTheme(prev => {
-          // Reseta logoError quando a escola muda (troca de usuário/escola)
-          if (prev?.slug !== newTheme.slug) setLogoError(false)
-          return newTheme
-        })
+        theme = getBrandTheme(session.user.codColigada, session.user.codFilial)
       } catch {
         // Escola não mapeada — layout sem tema dinâmico
       }
     }
-    setMounted(true)
-  }, [router, pathname])
+  }
 
   function handleLogout() {
     clearSession()
@@ -62,7 +60,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     router.push('/login')
   }
 
-  if (!mounted) return <PortalHeaderSkeleton />
+  if (!isMounted) return <PortalHeaderSkeleton />
 
   const corPrimaria = theme?.corPrimaria ?? '#1e40af'
   const corSecundaria = theme?.corSecundaria ?? '#1e3a8a'

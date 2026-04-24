@@ -19,7 +19,9 @@ export default function ConclusaoPage() {
   const router = useRouter()
   const status = params.get('status') ?? 'pendente'
   const idMatricula = params.get('idMatricula')
-  const protocolo = idMatricula ?? `PROT-${Date.now().toString(36).toUpperCase()}`
+  const [protocolo] = useState<string>(() =>
+    idMatricula ?? `PROT-${Date.now().toString(36).toUpperCase()}`
+  )
   const sucesso = status === 'sucesso'
 
   const [copiado, setCopiado] = useState(false)

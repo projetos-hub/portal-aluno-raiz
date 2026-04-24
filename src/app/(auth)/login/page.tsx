@@ -14,17 +14,22 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [logoutMsg, setLogoutMsg] = useState(false)
+  const [logoutMsg, setLogoutMsg] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    const has = sessionStorage.getItem('logout_msg')
+    if (has) {
+      sessionStorage.removeItem('logout_msg')
+      return true
+    }
+    return false
+  })
   const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
-    if (sessionStorage.getItem('logout_msg')) {
-      sessionStorage.removeItem('logout_msg')
-      setLogoutMsg(true)
-      const t = setTimeout(() => setLogoutMsg(false), 4000)
-      return () => clearTimeout(t)
-    }
-  }, [])
+    if (!logoutMsg) return
+    const t = setTimeout(() => setLogoutMsg(false), 4000)
+    return () => clearTimeout(t)
+  }, [logoutMsg])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
