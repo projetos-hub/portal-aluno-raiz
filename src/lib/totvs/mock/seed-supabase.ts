@@ -4,6 +4,14 @@ import { createClient } from '@supabase/supabase-js'
 import usuarios from './data/usuarios.json'
 import brandColors from '../../../../public/brand-colors.json'
 
+interface BrandColor {
+  marca?: string
+  corPrimaria: string
+  corSecundaria: string
+  corTexto?: string
+  logoFile: string
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -27,7 +35,7 @@ async function seedUsers() {
 
 async function seedThemes() {
   console.log('Seeding design_themes...')
-  for (const [slug, brand] of Object.entries(brandColors as Record<string, any>)) {
+  for (const [slug, brand] of Object.entries(brandColors as Record<string, BrandColor>)) {
     const { error } = await supabase.from('design_themes').upsert({
       slug,
       nome_marca: brand.marca ?? slug,

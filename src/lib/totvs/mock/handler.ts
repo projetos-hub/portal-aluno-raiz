@@ -40,7 +40,11 @@ async function handleEduAluno(params: Record<string, string>): Promise<TotvsResp
   const codFilial = params.codFilial ? Number(params.codFilial) : null
   const ra = params.RA ?? params.ra ?? null
 
-  // Edge case: simulated timeout (aliases: RA-TIMEOUT e TIMEOUT-001)
+  // Edge case: simulated timeout via query param (controlado) ou via RA especial
+  if (params.simulate_timeout === 'true') {
+    await new Promise(r => setTimeout(r, 6000))
+    return EMPTY_RESPONSE as TotvsResponse<EduAluno>
+  }
   if (ra === 'RA-TIMEOUT' || ra === 'TIMEOUT-001') {
     await new Promise(r => setTimeout(r, 5000))
     return EMPTY_RESPONSE as TotvsResponse<EduAluno>
