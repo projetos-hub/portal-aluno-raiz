@@ -101,6 +101,16 @@ function handleEduContratoGet(params: Record<string, string>): TotvsResponse<Edu
 
 function handleEduContratoPost(body: unknown): TotvsResponse<unknown> {
   const payload = (body ?? {}) as Record<string, unknown>
+
+  // Edge case: simulated TOTVS error — pendência financeira bloqueia contrato
+  if (payload.RA === 'ERR-001' || payload.ra === 'ERR-001') {
+    return {
+      messages: [{ code: '0422', type: 'error', detail: 'Contrato não permitido — pendência financeira.' }],
+      length: 0,
+      data: null,
+    }
+  }
+
   return {
     messages: [],
     length: 1,
@@ -178,6 +188,16 @@ export async function mockHandler(
 
   if (ds === 'eduturmadiscdata' || ds === 'eduturmadisc') {
     return handleEduTurmaDisc(params)
+  }
+
+  // Mock webhook de pagamento — só para testes locais
+  if (ds === 'webhooks/pagamento' || ds === 'webhooks-pagamento' || ds === 'pagamento') {
+    const payload = (body ?? {}) as Record<string, unknown>
+    return {
+      messages: [],
+      length: 1,
+      data: [{ ok: true, IDMATRICULA: payload.IDMATRICULA ?? null, status: payload.status ?? 'pago' }],
+    }
   }
 
   console.warn(`[mock] DataServer não reconhecido: "${dataserver}" (normalizado: "${ds}"). Retornando EMPTY_RESPONSE.`)

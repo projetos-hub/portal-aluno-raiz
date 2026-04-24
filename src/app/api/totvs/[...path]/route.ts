@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 const DataServerParamsSchema = z.object({
-  codColigada: z.coerce.number().int().positive(),
-  codFilial: z.coerce.number().int().positive(),
+  codColigada: z.coerce.number().int().positive().optional(),
+  codFilial: z.coerce.number().int().positive().optional(),
 }).passthrough()
 
 const TOTVS_BASE = 'https://raizeducacao160286.rm.cloudtotvs.com.br:8051'
@@ -49,6 +49,24 @@ async function logToSupabase(payload: {
   await supabase.from('logs_rm_api').insert(payload).then(undefined, () => {})
 }
 
+async function logRematriculaEvent(
+  method: string,
+  dataserver: string,
+  statusCode: number,
+  params: Record<string, string>,
+) {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return
+  const ra = params['RA'] ?? params['ra'] ?? 'unknown'
+  let event: string | null = null
+  if (method === 'GET' && dataserver === 'EduContratoData') event = 'visualizou_contrato'
+  else if (method === 'POST' && dataserver === 'EduMatriculaData') event = 'assinou'
+  else if (statusCode >= 400) event = 'erro'
+  if (!event) return
+  const { createServerClient } = await import('@/lib/supabase/server')
+  const supabase = createServerClient()
+  await supabase.from('rematricula_logs').insert({ event, ra, status_code: statusCode }).then(undefined, () => {})
+}
+
 async function handler(req: NextRequest, pathSegments: string[]) {
   const start = Date.now()
   const mode = process.env.TOTVS_MODE ?? 'mock'
@@ -59,7 +77,7 @@ async function handler(req: NextRequest, pathSegments: string[]) {
   const params: Record<string, string> = {}
   searchParams.forEach((v, k) => { params[k] = v })
 
-  // Validate required params (codColigada + codFilial mandatory for TOTVS)
+  // Validate param formats (rejects non-numeric values, allows absence)
   const paramsValidation = DataServerParamsSchema.safeParse(params)
   if (!paramsValidation.success) {
     return NextResponse.json(
@@ -80,6 +98,7 @@ async function handler(req: NextRequest, pathSegments: string[]) {
     const { mockHandler } = await import('@/lib/totvs/mock/handler')
     const result = await mockHandler(dataserver, params, req.method, parsedBody)
     void logToSupabase({ method: req.method, dataserver, params, status_code: 200, duration_ms: Date.now() - start })
+    void logRematriculaEvent(req.method, dataserver, 200, params)
     return NextResponse.json(result)
   }
 
@@ -103,6 +122,7 @@ async function handler(req: NextRequest, pathSegments: string[]) {
 
   const json: unknown = await upstreamRes.json()
   void logToSupabase({ method: req.method, dataserver, params, status_code: upstreamRes.status, duration_ms: Date.now() - start })
+  void logRematriculaEvent(req.method, dataserver, upstreamRes.status, params)
   return NextResponse.json(json, { status: upstreamRes.status })
 }
 
