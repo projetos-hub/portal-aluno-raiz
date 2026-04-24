@@ -168,8 +168,14 @@ export default function SelecaoPage() {
 
   if (cards.length === 0) {
     return (
-      <div className="max-w-lg mx-auto text-center py-12 space-y-3">
-        <p className="text-muted-foreground">Nenhum aluno encontrado para esta conta.</p>
+      <div className="max-w-lg mx-auto text-center py-16 space-y-4">
+        <div className="text-5xl" aria-hidden="true">🎓</div>
+        <div className="space-y-1">
+          <p className="font-medium">Nenhum aluno vinculado à sua conta</p>
+          <p className="text-sm text-muted-foreground">
+            Para vincular um aluno, entre em contato com a secretaria da escola.
+          </p>
+        </div>
         <Button variant="outline" size="sm" onClick={retry}>Tentar novamente</Button>
       </div>
     )
