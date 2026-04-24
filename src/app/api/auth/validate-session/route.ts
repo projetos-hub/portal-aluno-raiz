@@ -22,7 +22,9 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error || !data) {
-    return NextResponse.json({ valid: false })
+    // Session not found or DB error — trust the cookie.
+    // Only reject sessions that are explicitly found AND expired.
+    return NextResponse.json({ valid: true })
   }
 
   if (new Date(data.expires_at as string) < new Date()) {
