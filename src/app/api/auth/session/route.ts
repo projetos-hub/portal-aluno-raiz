@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-  const { token, expiresIn, user } = (await req.json()) as {
-    token: string
-    expiresIn: number
-    user: unknown
+  let token: string, expiresIn: number, user: unknown
+  try {
+    const body = (await req.json()) as { token: string; expiresIn: number; user: unknown }
+    token = body.token
+    expiresIn = body.expiresIn
+    user = body.user
+  } catch {
+    return NextResponse.json({ ok: false }, { status: 400 })
   }
   const res = NextResponse.json({ ok: true })
   const opts = {
@@ -19,17 +23,22 @@ export async function POST(req: NextRequest) {
   res.cookies.set('portal_user', JSON.stringify(user), opts)
 
   // Persist session to Supabase — required for validate-session and email flows
+  // Cookie is already set above — Supabase failure must never block the response
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
     console.error('[session/route] SUPABASE_SERVICE_ROLE_KEY not set — portal_sessions will not be populated')
   } else {
-    const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString()
-    const { createServerClient } = await import('@/lib/supabase/server')
-    const supabase = createServerClient()
-    const { error } = await supabase
-      .from('portal_sessions')
-      .upsert({ token, expires_at: expiresAt, user_data: user }, { onConflict: 'token' })
-    if (error) {
-      console.error('[session/route] Failed to upsert portal_sessions:', error.message)
+    try {
+      const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString()
+      const { createServerClient } = await import('@/lib/supabase/server')
+      const supabase = createServerClient()
+      const { error } = await supabase
+        .from('portal_sessions')
+        .upsert({ token, expires_at: expiresAt, user_data: user }, { onConflict: 'token' })
+      if (error) {
+        console.error('[session/route] Failed to upsert portal_sessions:', error.message)
+      }
+    } catch (err) {
+      console.error('[session/route] Supabase upsert threw:', err)
     }
   }
 
