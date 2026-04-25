@@ -7,6 +7,73 @@ import { getSession, clearSession } from '@/lib/auth'
 import { BrandThemeContext, getBrandTheme } from '@/lib/brand-theme'
 import type { BrandTheme } from '@/lib/brand-theme'
 
+const STEPS = [
+  { label: 'Seleção',    path: '/selecao' },
+  { label: 'Rematrícula', path: '/rematricula' },
+  { label: 'Contrato',   path: '/contrato' },
+  { label: 'Assinatura', path: '/assinatura' },
+  { label: 'Conclusão',  path: '/conclusao' },
+]
+
+function FluxoStepper({ pathname }: { pathname: string }) {
+  const activeIdx = STEPS.findIndex(s => pathname.startsWith(s.path))
+  if (activeIdx === -1) return null
+
+  return (
+    <nav
+      aria-label="Etapas do processo"
+      className="bg-white border-b border-gray-100 px-4 sm:px-8 py-2.5"
+    >
+      <ol className="flex items-center justify-between max-w-lg mx-auto gap-0">
+        {STEPS.map((step, i) => {
+          const done = i < activeIdx
+          const active = i === activeIdx
+          return (
+            <li key={step.path} className="flex items-center flex-1 last:flex-none">
+              <div className="flex flex-col items-center gap-0.5">
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
+                  style={{
+                    background: done || active ? 'var(--cor-primaria, #1e40af)' : '#e5e7eb',
+                    color: done || active ? 'var(--cor-texto, #fff)' : '#9ca3af',
+                    transform: active ? 'scale(1.15)' : 'scale(1)',
+                  }}
+                  aria-current={active ? 'step' : undefined}
+                >
+                  {done ? (
+                    <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none">
+                      <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  ) : (
+                    <span>{i + 1}</span>
+                  )}
+                </div>
+                <span
+                  className="text-[10px] leading-tight font-medium hidden sm:block transition-colors"
+                  style={{ color: active ? 'var(--cor-primaria, #1e40af)' : done ? '#6b7280' : '#9ca3af' }}
+                >
+                  {step.label}
+                </span>
+                {active && (
+                  <span className="text-[10px] leading-tight font-medium sm:hidden" style={{ color: 'var(--cor-primaria, #1e40af)' }}>
+                    {step.label}
+                  </span>
+                )}
+              </div>
+              {i < STEPS.length - 1 && (
+                <div
+                  className="flex-1 h-px mx-1.5 sm:mx-2 transition-all duration-300"
+                  style={{ background: i < activeIdx ? 'var(--cor-primaria, #1e40af)' : '#e5e7eb' }}
+                />
+              )}
+            </li>
+          )
+        })}
+      </ol>
+    </nav>
+  )
+}
+
 function PortalHeaderSkeleton() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -25,14 +92,12 @@ function PortalHeaderSkeleton() {
   )
 }
 
-// useSyncExternalStore: padrão React 18 para detecção client-side sem setState em efeito
 const emptySubscribe = () => () => {}
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const [logoError, setLogoError] = useState(false)
-  // isMounted = false no servidor, true no cliente — sem useEffect + setMounted
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false)
 
   useEffect(() => {
@@ -41,7 +106,6 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     }
   }, [router, pathname])
 
-  // Deriva tema da sessão em render — sem setState em efeito
   let theme: BrandTheme | null = null
   if (isMounted) {
     const session = getSession()
@@ -49,7 +113,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       try {
         theme = getBrandTheme(session.user.codColigada, session.user.codFilial)
       } catch {
-        // Escola não mapeada — layout sem tema dinâmico
+        // Escola não mapeada
       }
     }
   }
@@ -79,7 +143,6 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           : undefined
       }
     >
-      {/* Tarefa 2.B: header com branding dramático */}
       <header
         className="flex items-center justify-between px-5 sm:px-8 transition-colors duration-500"
         style={{
@@ -111,22 +174,16 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               className="object-contain brightness-0 invert"
             />
           )}
-          {/* Tarefa 2.B: banner boas-vindas da escola */}
           {theme && (
             <div className="hidden sm:flex flex-col leading-tight">
-              <span className="text-xs font-medium opacity-70 tracking-wide">
-                Bem-vindo ao
-              </span>
+              <span className="text-xs font-medium opacity-70 tracking-wide">Bem-vindo ao</span>
               <span className="text-sm font-semibold">{theme.nomeEscola}</span>
             </div>
           )}
           {!theme && (
-            <span className="hidden sm:block text-sm font-medium opacity-90">
-              Portal do Aluno
-            </span>
+            <span className="hidden sm:block text-sm font-medium opacity-90">Portal do Aluno</span>
           )}
         </div>
-
         <button
           onClick={handleLogout}
           className="text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white/15 active:bg-white/25"
@@ -136,7 +193,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         </button>
       </header>
 
-      {/* Tarefa 2.E: fadeUp nas transições de página */}
+      <FluxoStepper pathname={pathname} />
+
       <main key={pathname} className="flex-1 p-4 sm:p-6 lg:p-8 animate-fade-up">
         {children}
       </main>
