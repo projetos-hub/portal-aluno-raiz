@@ -7,9 +7,11 @@ test('fluxo completo: login → selecao → rematricula → assinatura → concl
   await page.locator('#password').fill('123456')
   await page.getByRole('button', { name: /entrar/i }).click()
 
-  // 2. Selecao — aguarda cards de aluno carregarem
+  // 2. Selecao — aguarda heading confirmar que dados carregaram
   await page.waitForURL(/\/selecao/)
-  const firstCard = page.locator('[class*="cursor-pointer"]').first()
+  await page.getByRole('heading', { name: /selecione o aluno/i }).waitFor({ timeout: 20_000 })
+  // Sprint 7: cards redesenhados como <button> — seletor por texto do aluno (igual 02-selecao.spec.ts)
+  const firstCard = page.getByText('Lucas Torres Silva').first()
   await expect(firstCard).toBeVisible({ timeout: 10_000 })
   await firstCard.click()
 
