@@ -108,5 +108,15 @@
     "codColigada": 8,
     "codFilial": 1,
     "alunosRA": []
+  },
+  {
+    "id": 101,
+    "email": "pai.multiescola@test.com",
+    "senha": "123456",
+    "nome": "Roberto Andrade",
+    "cpf": "111.222.333-44",
+    "codColigada": 8,
+    "codFilial": 1,
+    "alunosRA": ["2024001", "2024099"]
   }
 ]
