@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { z } from 'zod'
 import { totvs } from '@/lib/totvs/client'
-import type { EduAluno, EduMatricula, EduContrato } from '@/lib/totvs/types'
+import type { EduAluno, EduMatricula, EduContrato, Parcela } from '@/lib/totvs/types'
 import { Button } from '@/components/ui/button'
 
 type FormaPagamento = 'PIX' | 'BOLETO' | 'DEBITO'
@@ -13,14 +13,7 @@ type ResponsavelInfo = { RESP_FINANCEIRO: string; RESP_ACADEMICO: string }
 
 type ItemOpcional = { titulo: string; descricao: string; valor: number }
 
-type Parcela = {
-  NR: number
-  SERVICO?: string
-  VENCIMENTO: string
-  VALORORIGINAL: number
-  BOLSA?: number
-  LIQUIDO: number
-}
+// Parcela imported from @/lib/totvs/types
 
 const responsavelSchema = z.object({
   nome: z.string().min(3, 'Mínimo 3 caracteres'),
@@ -133,9 +126,9 @@ function ParcelasModal({ parcelas, onClose }: { parcelas: Parcela[]; onClose: ()
                   <td className="px-3 py-2 text-muted-foreground">{p.NR}</td>
                   <td className="px-3 py-2 text-muted-foreground truncate max-w-[100px]">{p.SERVICO ?? 'Mensalidade'}</td>
                   <td className="px-3 py-2">{formatDate(p.VENCIMENTO)}</td>
-                  <td className="px-3 py-2 text-right text-muted-foreground">{moeda(p.VALORORIGINAL)}</td>
-                  <td className="px-3 py-2 text-right text-emerald-600">{p.BOLSA ? `-${moeda(p.BOLSA)}` : '—'}</td>
-                  <td className="px-3 py-2 text-right font-semibold" style={{ color: 'var(--cor-primaria, #1e40af)' }}>{moeda(p.LIQUIDO)}</td>
+                  <td className="px-3 py-2 text-right text-muted-foreground">{moeda(p.VALOR_ORIGINAL)}</td>
+                  <td className="px-3 py-2 text-right text-emerald-600">{p.VALOR_BOLSA ? `-${moeda(p.VALOR_BOLSA)}` : '—'}</td>
+                  <td className="px-3 py-2 text-right font-semibold" style={{ color: 'var(--cor-primaria, #1e40af)' }}>{moeda(p.VALOR_LIQUIDO)}</td>
                 </tr>
               ))}
             </tbody>
@@ -268,7 +261,7 @@ export default function RematriculaPage() {
   const desconto = contrato?.DESCONTO ?? 0
   const valorBruto = contrato?.VALORBRUTO ?? 0
   const valorFinal = contrato?.VALORFINAL ?? 0
-  const parcelas = ((contrato as Record<string, unknown>)?.PARCELAS ?? []) as Parcela[]
+  const parcelas = contrato?.PARCELAS ?? []
   const resp = getRespDisplay()
 
   const FORMA_LABELS: Record<FormaPagamento, string> = {

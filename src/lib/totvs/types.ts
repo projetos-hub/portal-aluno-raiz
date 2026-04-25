@@ -44,15 +44,15 @@ export interface EduContrato {
   IDCONTRATO: number
   RA: string
   CODPERIODO: string
-  VALORTOTAL: number
+  VALORBRUTO: number       // normalized from VALORTOTAL in Sprint 7
   DESCONTO: number
   VALORFINAL: number
-  NRPARCELAS: number
-  VALORPARCELA: number
-  DTPRIMEIROVCTO: string
+  QUANTIDADEPARCELAS: number  // normalized from NRPARCELAS in Sprint 7
+  PRIMEIROVENCIMENTO: string  // normalized from DTPRIMEIROVCTO in Sprint 7
   FORMAPAGAMENTO: string // PIX | BOLETO | DEBITO
   SITUACAO: string
   CODRESPONSAVEL: number
+  PARCELAS?: Parcela[]     // added in Sprint 7
 }
 
 export interface EduTurmaDisc {
