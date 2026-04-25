@@ -1,15 +1,28 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { setSession } from '@/lib/auth'
+import { getBrandTheme } from '@/lib/brand-theme'
 import type { AuthUser } from '@/lib/auth'
+
+const emptySubscribe = () => () => {}
+
+function getLastEscolaTheme() {
+  try {
+    const last = document.cookie.split('; ').find(r => r.startsWith('last_escola='))?.split('=')[1]
+    if (!last) return null
+    return getBrandTheme(Number(last))
+  } catch { return null }
+}
 
 export default function LoginPage() {
   const router = useRouter()
+  // Lê o tema da última escola visitada (client-only, via cookie last_escola)
+  const lastEscolaTheme = useSyncExternalStore(emptySubscribe, getLastEscolaTheme, () => null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -60,8 +73,11 @@ export default function LoginPage() {
         alunosRA: [],
       }
 
-      // Seta cookies — PR #8 tornou /api/auth/session httpOnly=false, sem conflito
       setSession(data.token, data.expiresIn, user)
+      // Salva última escola para gradiente inteligente no próximo login
+      if (user.codColigada > 0) {
+        document.cookie = `last_escola=${user.codColigada}; path=/; max-age=31536000; SameSite=Lax`
+      }
       if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
         void fetch('/api/auth/session', {
           method: 'POST',
@@ -80,10 +96,14 @@ export default function LoginPage() {
   return (
     // Tarefa 2.A: login com identidade editorial forte
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Painel lateral — identidade da Raiz Educação */}
+      {/* Painel lateral — gradiente da escola ou Raiz */}
       <div
-        className="hidden lg:flex lg:w-2/5 xl:w-1/2 flex-col items-center justify-center p-12 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)' }}
+        className="hidden lg:flex lg:w-2/5 xl:w-1/2 flex-col items-center justify-center p-12 relative overflow-hidden transition-all duration-700"
+        style={{
+          background: lastEscolaTheme
+            ? `linear-gradient(135deg, color-mix(in srgb, ${lastEscolaTheme.corPrimaria} 60%, #0f172a) 0%, ${lastEscolaTheme.corPrimaria} 50%, ${lastEscolaTheme.corSecundaria} 100%)`
+            : 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)',
+        }}
       >
         {/* Textura sutil */}
         <div

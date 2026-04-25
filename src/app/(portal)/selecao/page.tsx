@@ -4,9 +4,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSession, setSession } from '@/lib/auth'
 import { totvs } from '@/lib/totvs/client'
+import { getBrandTheme } from '@/lib/brand-theme'
 import type { EduAluno, EduMatricula } from '@/lib/totvs/types'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 interface AlunoCard {
@@ -14,34 +13,32 @@ interface AlunoCard {
   matricula: EduMatricula | null
 }
 
-interface HistoricoState {
-  open: boolean
-  loading: boolean
-  data: EduMatricula[] | null
+function serieLabel(serie: string | undefined) {
+  if (!serie) return '—'
+  const n = Number(serie)
+  if (isNaN(n)) return serie
+  return `${n}º ano`
 }
 
-function statusBadge(situacao: string) {
-  const s = situacao?.toUpperCase() ?? ''
-  if (s === 'ATIVO')      return { label: 'Ativo',      className: 'bg-green-600 text-white hover:opacity-90' }
-  if (s === 'CONCLUÍDO' || s === 'CONCLUIDO')
-                           return { label: 'Concluído',  className: 'bg-gray-500 text-white hover:opacity-90' }
-  if (s === 'CANCELADO')  return { label: 'Cancelado',  className: 'bg-red-600 text-white hover:opacity-90' }
-  if (s === 'PENDENTE')   return { label: 'Pendente',   className: 'bg-amber-500 text-white hover:opacity-90' }
-  return { label: situacao, className: 'bg-gray-400 text-white hover:opacity-90' }
+function serieDestino(serie: string | undefined) {
+  if (!serie) return '—'
+  const n = Number(serie)
+  if (isNaN(n)) return serie
+  return `${n + 1}º ano`
 }
 
 function SelecaoSkeleton() {
   return (
     <div className="max-w-lg mx-auto space-y-3">
-      <div className="h-6 w-36 rounded-md bg-muted animate-pulse mb-4" />
-      {[1, 2, 3].map(i => (
-        <div key={i} className="rounded-lg border p-4 flex justify-between items-start gap-4">
-          <div className="space-y-2 flex-1 min-w-0">
-            <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
-            <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
-            <div className="h-3 w-1/3 rounded bg-muted animate-pulse" />
+      <div className="h-6 w-44 rounded-md bg-muted animate-pulse mb-5" />
+      {[1, 2].map(i => (
+        <div key={i} className="rounded-2xl border p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-20 rounded bg-muted animate-pulse" />
+            <div className="h-4 w-28 rounded bg-muted animate-pulse" />
           </div>
-          <div className="h-5 w-20 rounded-full bg-muted animate-pulse shrink-0" />
+          <div className="h-5 w-48 rounded bg-muted animate-pulse" />
+          <div className="h-3 w-32 rounded bg-muted animate-pulse" />
         </div>
       ))}
     </div>
@@ -54,10 +51,8 @@ export default function SelecaoPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
-  const [historico, setHistorico] = useState<Record<string, HistoricoState>>({})
-  // Performance: exibe os primeiros 5 cards; "Ver mais" se houver >5 alunos
-  const PAGE_SIZE = 5
   const [showAll, setShowAll] = useState(false)
+  const PAGE_SIZE = 5
 
   const retry = useCallback(() => {
     setError(null)
@@ -82,13 +77,7 @@ export default function SelecaoPage() {
         const alunos = alunosRes.data ?? []
         const matriculas = matriculasRes.data ?? []
 
-        const result: AlunoCard[] = alunos.map(a => ({
-          aluno: a,
-          matricula: matriculas.find(m => m.RA === a.RA && m.CODCOLIGADA === a.CODCOLIGADA) ?? null,
-        }))
-
-        setCards(result)
-
+        // Atualiza sessão se codColigada era stub
         if (alunos.length > 0 && session.user.codColigada === 0) {
           const first = alunos[0]
           setSession(session.token, 300, {
@@ -98,6 +87,20 @@ export default function SelecaoPage() {
             alunosRA: alunos.map(a => a.RA),
           })
         }
+
+        const result: AlunoCard[] = alunos.map(a => ({
+          aluno: a,
+          matricula: matriculas.find(m => m.RA === a.RA && m.CODCOLIGADA === a.CODCOLIGADA) ?? null,
+        }))
+
+        setCards(result)
+
+        // Auto-redirect: 1 aluno com 1 matrícula
+        if (result.length === 1 && result[0].matricula) {
+          const { aluno } = result[0]
+          router.replace(`/rematricula?ra=${aluno.RA}&codColigada=${aluno.CODCOLIGADA}&codFilial=${aluno.CODFILIAL}`)
+          return
+        }
       } catch {
         setError('Não foi possível carregar os alunos. Tente novamente.')
       } finally {
@@ -106,39 +109,7 @@ export default function SelecaoPage() {
     }
 
     void load()
-  }, [retryCount])
-
-  async function toggleHistorico(aluno: EduAluno) {
-    const key = `${aluno.CODCOLIGADA}-${aluno.RA}`
-    const current = historico[key]
-
-    if (current?.open) {
-      setHistorico(h => ({ ...h, [key]: { ...h[key], open: false } }))
-      return
-    }
-
-    if (current?.data !== null) {
-      setHistorico(h => ({ ...h, [key]: { ...h[key], open: true } }))
-      return
-    }
-
-    setHistorico(h => ({ ...h, [key]: { open: true, loading: true, data: null } }))
-    try {
-      const res = await totvs.get<EduMatricula>('EduMatriculaData', {
-        RA: aluno.RA,
-        codColigada: aluno.CODCOLIGADA,
-        codFilial: aluno.CODFILIAL,
-      })
-      const sorted = (res.data ?? []).sort((a, b) => {
-        const da = a.DTMATRICULA ? new Date(a.DTMATRICULA).getTime() : 0
-        const db = b.DTMATRICULA ? new Date(b.DTMATRICULA).getTime() : 0
-        return db - da
-      })
-      setHistorico(h => ({ ...h, [key]: { open: true, loading: false, data: sorted } }))
-    } catch {
-      setHistorico(h => ({ ...h, [key]: { open: true, loading: false, data: [] } }))
-    }
-  }
+  }, [retryCount, router])
 
   function handleSelect(card: AlunoCard) {
     const { aluno } = card
@@ -158,7 +129,7 @@ export default function SelecaoPage() {
   if (error) {
     return (
       <div className="max-w-lg mx-auto">
-        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 space-y-3">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-5 space-y-3">
           <p className="text-destructive text-sm">{error}</p>
           <Button variant="outline" size="sm" onClick={retry}>Tentar novamente</Button>
         </div>
@@ -169,11 +140,17 @@ export default function SelecaoPage() {
   if (cards.length === 0) {
     return (
       <div className="max-w-lg mx-auto text-center py-16 space-y-4">
-        <div className="text-5xl" aria-hidden="true">🎓</div>
-        <div className="space-y-1">
-          <p className="font-medium">Nenhum aluno vinculado à sua conta</p>
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center mx-auto text-2xl"
+          style={{ background: 'var(--cor-primaria-10, rgba(30,64,175,0.08))' }}
+          aria-hidden="true"
+        >
+          🎓
+        </div>
+        <div className="space-y-1.5">
+          <p className="font-semibold text-base">Nenhum aluno vinculado à sua conta</p>
           <p className="text-sm text-muted-foreground">
-            Para vincular um aluno, entre em contato com a secretaria da escola.
+            Entre em contato com a secretaria da escola para vincular um aluno.
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={retry}>Tentar novamente</Button>
@@ -186,118 +163,91 @@ export default function SelecaoPage() {
 
   return (
     <div className="max-w-lg mx-auto space-y-3">
-      <h1 className="text-lg font-semibold mb-4">Selecione o aluno</h1>
+      <div className="mb-5">
+        <h1 className="text-xl font-semibold tracking-tight">Selecione o aluno</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Escolha para quem você vai confirmar a rematrícula
+        </p>
+      </div>
+
       {visibleCards.map(({ aluno, matricula }, index) => {
-        const key = `${aluno.CODCOLIGADA}-${aluno.RA}`
-        const hist = historico[key]
+        const isRematricula = matricula?.TIPOINGRESSO?.toUpperCase().includes('REMATRICULA') ?? true
+        const isPendente = matricula?.SITUACAO?.toUpperCase() === 'PENDENTE'
+
+        let escola: { nomeEscola: string; marca: string } | null = null
+        try { escola = getBrandTheme(aluno.CODCOLIGADA, aluno.CODFILIAL) } catch { /* ok */ }
 
         return (
-          <Card
-            key={key}
-            className="overflow-hidden animate-stagger"
-            style={{ animationDelay: `${index * 100}ms` }}
+          <button
+            key={`${aluno.CODCOLIGADA}-${aluno.RA}`}
+            onClick={() => handleSelect({ aluno, matricula })}
+            className="w-full text-left rounded-2xl border p-5 transition-all duration-200 hover:shadow-md active:scale-[.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring animate-stagger"
+            style={{
+              animationDelay: `${index * 80}ms`,
+              borderColor: isPendente ? 'var(--cor-primaria, #1e40af)' : undefined,
+              borderWidth: isPendente ? '2px' : undefined,
+              background: isPendente ? 'var(--cor-primaria-10, rgba(30,64,175,0.04))' : undefined,
+            }}
+            aria-label={`Selecionar aluno ${aluno.NOME}`}
           >
-            <CardContent
-              className="p-4 flex justify-between items-start gap-4 cursor-pointer hover:bg-accent/30 transition-colors active:scale-[.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-t-lg"
-              role="button"
-              tabIndex={0}
-              aria-label={`Selecionar aluno ${aluno.NOME}`}
-              onClick={() => handleSelect({ aluno, matricula })}
-              onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  handleSelect({ aluno, matricula })
-                }
-              }}
-            >
-              <div className="min-w-0">
-                <p className="font-medium truncate">{aluno.NOME}</p>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Série {aluno.CODSERIE} → {String(Number(aluno.CODSERIE) + 1)}º ano
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Turno: {aluno.CODTURNO === 'M' ? 'Manhã' : aluno.CODTURNO === 'T' ? 'Tarde' : 'Noite'}
-                </p>
-              </div>
-              <div className="flex flex-col items-end gap-2 shrink-0">
-                <Badge
-                  className={
-                    matricula?.TIPOINGRESSO === 'REMATRICULA'
-                      ? 'bg-[var(--cor-primaria)] hover:opacity-90'
-                      : 'bg-green-600 text-white hover:opacity-90'
-                  }
+            {/* Tags de escola + badge tipo */}
+            <div className="flex items-center justify-between gap-2 mb-3">
+              {escola && (
+                <span
+                  className="text-xs font-medium px-2.5 py-0.5 rounded-full"
+                  style={{
+                    background: 'var(--cor-primaria-10, rgba(30,64,175,0.08))',
+                    color: 'var(--cor-primaria, #1e40af)',
+                  }}
                 >
-                  {matricula?.TIPOINGRESSO ?? 'MATRÍCULA'}
-                </Badge>
-              </div>
-            </CardContent>
-
-            {/* Tarefa 2.B: botão e seção de histórico */}
-            <div className="px-4 pb-3 border-t border-border/50">
-              <button
-                onClick={e => {
-                  e.stopPropagation()
-                  void toggleHistorico(aluno)
-                }}
-                aria-expanded={hist?.open ?? false}
-                aria-controls={`historico-${key}`}
-                aria-label={hist?.open ? `Ocultar histórico de ${aluno.NOME}` : `Ver histórico de rematrículas de ${aluno.NOME}`}
-                className="mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-              >
-                <span className="text-[10px]" aria-hidden="true">{hist?.open ? '▲' : '▼'}</span>
-                {hist?.open ? 'Ocultar histórico' : 'Ver histórico de rematrículas'}
-              </button>
-
-              {hist?.open && (
-                <div id={`historico-${key}`} className="mt-3 space-y-2 animate-fade-up" role="region" aria-label={`Histórico de ${aluno.NOME}`}>
-                  {hist.loading && (
-                    <div className="space-y-1.5">
-                      {[1, 2].map(i => (
-                        <div key={i} className="h-8 rounded-md bg-muted animate-pulse" />
-                      ))}
-                    </div>
-                  )}
-                  {!hist.loading && hist.data?.length === 0 && (
-                    <p className="text-xs text-muted-foreground">Nenhum histórico encontrado.</p>
-                  )}
-                  {!hist.loading && (hist.data?.length ?? 0) > 0 && (
-                    <div className="rounded-lg border overflow-hidden text-xs">
-                      <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-1.5 bg-muted text-muted-foreground font-medium">
-                        <span>Período</span>
-                        <span>Tipo</span>
-                        <span>Status</span>
-                      </div>
-                      {hist.data!.map((m, i) => {
-                        const badge = statusBadge(m.SITUACAO ?? '')
-                        return (
-                          <div
-                            key={i}
-                            className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 items-center border-t border-border/50"
-                          >
-                            <span className="text-foreground">{m.CODPERIODO ?? '—'}</span>
-                            <span className="text-muted-foreground">{m.TIPOINGRESSO ?? '—'}</span>
-                            <span
-                              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${badge.className}`}
-                            >
-                              {badge.label}
-                            </span>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
+                  {escola.nomeEscola}
+                </span>
               )}
+              <span
+                className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ml-auto ${
+                  isRematricula ? 'text-white' : 'bg-emerald-100 text-emerald-800'
+                }`}
+                style={isRematricula ? { background: 'var(--cor-primaria, #1e40af)' } : undefined}
+              >
+                {isRematricula ? 'Rematrícula' : 'Matrícula'}
+              </span>
             </div>
-          </Card>
+
+            {/* Nome do aluno */}
+            <p className="font-semibold text-base leading-tight">{aluno.NOME}</p>
+
+            {/* Série atual → destino */}
+            <div className="flex items-center gap-1.5 mt-2 text-sm text-muted-foreground">
+              <span>{serieLabel(aluno.CODSERIE)}</span>
+              <svg viewBox="0 0 16 8" className="w-4 h-3 shrink-0" fill="none" aria-hidden="true">
+                <path d="M1 4h12M9 1l4 3-4 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="font-medium" style={{ color: 'var(--cor-primaria, #1e40af)' }}>
+                {serieDestino(aluno.CODSERIE)}
+              </span>
+              <span className="mx-1.5 text-gray-300" aria-hidden="true">·</span>
+              <span>
+                {aluno.CODTURNO === 'M' ? 'Manhã' : aluno.CODTURNO === 'T' ? 'Tarde' : 'Noite'}
+              </span>
+            </div>
+
+            {isPendente && (
+              <p
+                className="text-xs font-medium mt-2.5 flex items-center gap-1.5"
+                style={{ color: 'var(--cor-primaria, #1e40af)' }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" aria-hidden="true"/>
+                Pendente de confirmação
+              </p>
+            )}
+          </button>
         )
       })}
 
-      {/* Paginação: mostrar "Ver mais" quando há >5 alunos */}
       {!showAll && hiddenCount > 0 && (
         <button
           onClick={() => setShowAll(true)}
-          className="w-full py-2.5 text-sm text-center rounded-xl border border-dashed text-muted-foreground hover:text-foreground hover:border-solid transition-colors"
+          className="w-full py-3 text-sm text-center rounded-2xl border border-dashed text-muted-foreground hover:text-foreground hover:border-solid transition-colors"
         >
           Ver {hiddenCount} aluno{hiddenCount > 1 ? 's' : ''} restante{hiddenCount > 1 ? 's' : ''}
         </button>
