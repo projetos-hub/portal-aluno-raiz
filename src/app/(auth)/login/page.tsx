@@ -78,11 +78,13 @@ export default function LoginPage() {
         document.cookie = `last_escola=${user.codColigada}; path=/; max-age=31536000; SameSite=Lax`
       }
       if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-        void fetch('/api/auth/session', {
+        // .catch() necessário: void não suprime unhandled rejection —
+        // rejeição não tratada dispara Fast Refresh em modo dev
+        fetch('/api/auth/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token: data.token, expiresIn: data.expiresIn, user }),
-        })
+        }).catch(() => {})
       }
       router.push('/selecao')
     } catch {
