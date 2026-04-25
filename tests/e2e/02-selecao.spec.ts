@@ -22,10 +22,10 @@ test('cards têm badge REMATRICULA ou MATRÍCULA', async ({ page }) => {
 })
 
 test('clicar num card navega para /rematricula com params', async ({ page }) => {
-  // Aguarda os cards carregarem (dados chegam via API mock assíncrona)
-  const firstCard = page.locator('[class*="cursor-pointer"]').first()
-  await expect(firstCard).toBeVisible()
-  await firstCard.click()
+  // Sprint 7: cards redesenhados — clica no card via texto do aluno
+  const card = page.getByText('Lucas Torres Silva').first()
+  await expect(card).toBeVisible()
+  await card.click()
   await page.waitForURL(/\/rematricula\?ra=/)
   await expect(page).toHaveURL(/\/rematricula\?ra=.*&codColigada=.*&codFilial=/)
 })

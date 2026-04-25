@@ -27,12 +27,12 @@ test('seleção de forma de pagamento funciona', async ({ page }) => {
   await expect(page.getByRole('radio', { name: /pix/i })).toHaveAttribute('aria-checked', 'false')
 })
 
-test('botão Ver Contrato navega para /disciplinas (nova tela de seleção)', async ({ page }) => {
-  // Sprint 8.2A: "Ver Contrato PDF" agora vai para /disciplinas antes do contrato
+test('botão Ver Contrato navega para /contrato', async ({ page }) => {
+  // Sprint 7: /disciplinas deletada — "Ver Contrato" vai direto para /contrato
   await expect(page.getByRole('button', { name: /ver contrato/i })).toBeVisible()
   await page.getByRole('button', { name: /ver contrato/i }).click()
-  await page.waitForURL(/\/disciplinas\?ra=2024001/)
-  await expect(page).toHaveURL(/\/disciplinas\?ra=2024001&codColigada=2&codFilial=3/)
+  await page.waitForURL(/\/contrato/)
+  await expect(page).toHaveURL(/\/contrato/)
 })
 
 test('botão Confirmar e Assinar navega para /assinatura com formaPagamento', async ({ page }) => {
