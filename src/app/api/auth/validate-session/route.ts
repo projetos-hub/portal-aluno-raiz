@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { AuthUser } from '@/lib/totvs/types'
 
+const SESSION_DURATION_S = 300
+const RENEW_THRESHOLD_MS = 2 * 60 * 1000 // renew when < 2 min remaining
+
 export async function POST(req: NextRequest) {
   const token = req.cookies.get('portal_token')?.value
   if (!token) {
@@ -27,8 +30,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ valid: true })
   }
 
-  if (new Date(data.expires_at as string) < new Date()) {
+  const expiresAt = new Date(data.expires_at as string)
+  const now = new Date()
+
+  if (expiresAt < now) {
     return NextResponse.json({ valid: false })
+  }
+
+  const msRemaining = expiresAt.getTime() - now.getTime()
+  if (msRemaining < RENEW_THRESHOLD_MS) {
+    const newExpiresAt = new Date(now.getTime() + SESSION_DURATION_S * 1000)
+    void supabase
+      .from('portal_sessions')
+      .update({ expires_at: newExpiresAt.toISOString() })
+      .eq('token', token)
+      .then(undefined, () => {})
+
+    const res = NextResponse.json({ valid: true, renewed: true, user: data.user_data as AuthUser })
+    res.cookies.set('portal_token', token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: SESSION_DURATION_S,
+      path: '/',
+    })
+    return res
   }
 
   return NextResponse.json({ valid: true, user: data.user_data as AuthUser })

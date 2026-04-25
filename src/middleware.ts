@@ -9,13 +9,20 @@ export async function middleware(req: NextRequest) {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
     try {
       const validateUrl = new URL('/api/auth/validate-session', req.nextUrl.origin)
-      const res = await fetch(validateUrl.toString(), {
+      const validateRes = await fetch(validateUrl.toString(), {
         method: 'POST',
         headers: { cookie: req.headers.get('cookie') ?? '' },
       })
-      const data = (await res.json()) as { valid: boolean }
+      const data = (await validateRes.json()) as { valid: boolean; renewed?: boolean }
       if (!data.valid) {
         return NextResponse.redirect(new URL('/login', req.url))
+      }
+      // If session was silently renewed, forward the updated cookie to the browser
+      if (data.renewed) {
+        const setCookie = validateRes.headers.get('set-cookie')
+        const next = NextResponse.next()
+        if (setCookie) next.headers.set('set-cookie', setCookie)
+        return next
       }
     } catch {
       // validation unavailable — fall through, trust the cookie

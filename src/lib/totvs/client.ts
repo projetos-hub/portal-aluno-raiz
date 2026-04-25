@@ -26,7 +26,7 @@ async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 async function request<T>(
-  method: 'GET' | 'POST',
+  method: 'GET' | 'POST' | 'PATCH',
   dataserver: string,
   params?: Record<string, string | number>,
   body?: unknown,
@@ -47,7 +47,7 @@ async function request<T>(
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: method === 'POST' ? JSON.stringify(body) : undefined,
+      body: method !== 'GET' ? JSON.stringify(body) : undefined,
     })
 
     if (!res.ok) {
@@ -72,5 +72,13 @@ export const totvs = {
     params?: Record<string, string | number>,
   ): Promise<TotvsResponse<T>> {
     return request<T>('POST', dataserver, params, body)
+  },
+
+  patch<T>(
+    dataserver: string,
+    body: unknown,
+    params?: Record<string, string | number>,
+  ): Promise<TotvsResponse<T>> {
+    return request<T>('PATCH', dataserver, params, body)
   },
 }

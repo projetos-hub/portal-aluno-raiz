@@ -73,6 +73,20 @@ export interface EduColigada {
   NOME: string
 }
 
+export interface EduResponsavel {
+  RESP_FINANCEIRO: string
+  RESP_ACADEMICO: string
+}
+
+export interface Parcela {
+  NR: number
+  SERVICO: string
+  VENCIMENTO: string
+  VALOR_ORIGINAL: number
+  VALOR_BOLSA: number
+  VALOR_LIQUIDO: number
+}
+
 export interface AuthUser {
   id: string
   email: string

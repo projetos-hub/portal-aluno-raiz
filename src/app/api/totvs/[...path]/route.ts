@@ -54,17 +54,25 @@ async function logRematriculaEvent(
   dataserver: string,
   statusCode: number,
   params: Record<string, string>,
+  responseBody?: unknown,
 ) {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return
   const ra = params['RA'] ?? params['ra'] ?? 'unknown'
   let event: string | null = null
+  let idmatricula: number | null = null
   if (method === 'GET' && dataserver === 'EduContratoData') event = 'visualizou_contrato'
-  else if (method === 'POST' && dataserver === 'EduMatriculaData') event = 'assinou'
+  else if (method === 'POST' && dataserver === 'EduMatriculaData') {
+    event = 'assinou'
+    if (responseBody && typeof responseBody === 'object' && !Array.isArray(responseBody)) {
+      const typed = responseBody as { data?: Array<{ IDMATRICULA?: number }> }
+      idmatricula = typed.data?.[0]?.IDMATRICULA ?? null
+    }
+  }
   else if (statusCode >= 400) event = 'erro'
   if (!event) return
   const { createServerClient } = await import('@/lib/supabase/server')
   const supabase = createServerClient()
-  await supabase.from('rematricula_logs').insert({ event, ra, status_code: statusCode }).then(undefined, () => {})
+  await supabase.from('rematricula_logs').insert({ event, ra, status_code: statusCode, idmatricula }).then(undefined, () => {})
 }
 
 async function handler(req: NextRequest, pathSegments: string[]) {
@@ -98,7 +106,7 @@ async function handler(req: NextRequest, pathSegments: string[]) {
     const { mockHandler } = await import('@/lib/totvs/mock/handler')
     const result = await mockHandler(dataserver, params, req.method, parsedBody)
     void logToSupabase({ method: req.method, dataserver, params, status_code: 200, duration_ms: Date.now() - start })
-    void logRematriculaEvent(req.method, dataserver, 200, params)
+    void logRematriculaEvent(req.method, dataserver, 200, params, result)
     return NextResponse.json(result)
   }
 
@@ -122,7 +130,7 @@ async function handler(req: NextRequest, pathSegments: string[]) {
 
   const json: unknown = await upstreamRes.json()
   void logToSupabase({ method: req.method, dataserver, params, status_code: upstreamRes.status, duration_ms: Date.now() - start })
-  void logRematriculaEvent(req.method, dataserver, upstreamRes.status, params)
+  void logRematriculaEvent(req.method, dataserver, upstreamRes.status, params, json)
   return NextResponse.json(json, { status: upstreamRes.status })
 }
 
