@@ -194,6 +194,52 @@ export async function mockHandler(
     return handleEduTurmaDisc(params)
   }
 
+  // Responsável financeiro e acadêmico por aluno
+  if (ds === 'eduresponsaveldata' || ds === 'eduresponsavel') {
+    const ra = params.RA ?? params.ra ?? null
+    const responsaveis: Record<string, { RESP_FINANCEIRO: string; RESP_ACADEMICO: string }> = {
+      '2024001': { RESP_FINANCEIRO: 'Maria Silva', RESP_ACADEMICO: 'Maria Silva' },
+      '2024002': { RESP_FINANCEIRO: 'Maria Silva', RESP_ACADEMICO: 'Maria Silva' },
+      '2024003': { RESP_FINANCEIRO: 'João Pereira', RESP_ACADEMICO: 'João Pereira' },
+      '2024004': { RESP_FINANCEIRO: 'João Pereira', RESP_ACADEMICO: 'João Pereira' },
+      '2024005': { RESP_FINANCEIRO: 'Ana Rodrigues', RESP_ACADEMICO: 'Ana Rodrigues' },
+      '2024006': { RESP_FINANCEIRO: 'Ana Rodrigues', RESP_ACADEMICO: 'Ana Rodrigues' },
+      '2024007': { RESP_FINANCEIRO: 'Carlos Mendes', RESP_ACADEMICO: 'Carlos Mendes' },
+      '2024008': { RESP_FINANCEIRO: 'Carlos Mendes', RESP_ACADEMICO: 'Carlos Mendes' },
+      '2024099': { RESP_FINANCEIRO: 'Lucas Mesquita', RESP_ACADEMICO: 'Maria Mesquita' },
+    }
+    if (ra && responsaveis[ra]) {
+      return { messages: [], length: 1, data: [responsaveis[ra]] }
+    }
+    return EMPTY_RESPONSE
+  }
+
+  // Material didático e serviços extras por coligada
+  if (ds === 'edumaterialdata' || ds === 'edumaterial' || ds === 'eduservicosextra' || ds === 'eduservicos') {
+    const codColigada = params.codColigada ? Number(params.codColigada) : null
+    const materialPorColigada: Record<number, Array<{ titulo: string; descricao: string; valor: number }>> = {
+      8: [
+        { titulo: 'Material Didático 2026', descricao: 'Kit completo de livros e apostilas — Ensino Médio', valor: 850 },
+        { titulo: 'Uniforme Escolar', descricao: 'Kit 2 camisetas + calça/saia', valor: 320 },
+        { titulo: 'Seguro Escolar', descricao: 'Cobertura anual para acidentes em atividades escolares', valor: 120 },
+      ],
+      2: [
+        { titulo: 'Material Bilíngue 2026', descricao: 'Livros didáticos bilíngues + workbooks', valor: 1100 },
+        { titulo: 'Plataforma Digital', descricao: 'Acesso anual à plataforma de reforço em inglês', valor: 480 },
+      ],
+      9: [
+        { titulo: 'Material Didático 2026', descricao: 'Kit livros e apostilas — Global Tree', valor: 780 },
+      ],
+      18: [
+        { titulo: 'Material Didático 2026', descricao: 'Kit livros e apostilas — Apogeu', valor: 690 },
+        { titulo: 'Atividades Extracurriculares', descricao: 'Pacote anual: esportes + artes', valor: 960 },
+      ],
+    }
+    const resultado = codColigada !== null ? (materialPorColigada[codColigada] ?? []) : []
+    if (resultado.length === 0) return EMPTY_RESPONSE
+    return { messages: [], length: resultado.length, data: resultado }
+  }
+
   // Mock webhook de pagamento — só para testes locais
   if (ds === 'webhooks/pagamento' || ds === 'webhooks-pagamento' || ds === 'pagamento') {
     const payload = (body ?? {}) as Record<string, unknown>
