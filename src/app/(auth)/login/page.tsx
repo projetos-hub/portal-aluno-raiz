@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
@@ -9,20 +9,17 @@ import { setSession } from '@/lib/auth'
 import { getBrandTheme } from '@/lib/brand-theme'
 import type { AuthUser } from '@/lib/auth'
 
-const emptySubscribe = () => () => {}
-
-function getLastEscolaTheme() {
-  try {
-    const last = document.cookie.split('; ').find(r => r.startsWith('last_escola='))?.split('=')[1]
-    if (!last) return null
-    return getBrandTheme(Number(last))
-  } catch { return null }
-}
-
 export default function LoginPage() {
   const router = useRouter()
-  // Lê o tema da última escola visitada (client-only, via cookie last_escola)
-  const lastEscolaTheme = useSyncExternalStore(emptySubscribe, getLastEscolaTheme, () => null)
+  // Lê o tema da última escola uma vez ao montar — referência estável (sem re-render loop)
+  const [lastEscolaTheme] = useState<ReturnType<typeof getBrandTheme> | null>(() => {
+    if (typeof window === 'undefined') return null
+    try {
+      const last = document.cookie.split('; ').find(r => r.startsWith('last_escola='))?.split('=')[1]
+      if (!last) return null
+      return getBrandTheme(Number(last))
+    } catch { return null }
+  })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
